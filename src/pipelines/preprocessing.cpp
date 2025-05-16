@@ -1,12 +1,11 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc.hpp>
-#include <opencv2/highgui.hpp>
 #include <vector>
 #include <string>
 #include <filesystem>  // C++17
 #include "../header/basic_image_operations.hpp"
 #include "../header/geometrical_image_operations.hpp"
-#include "../pipelines/pipeline_colors.cpp"
+#include "../header/pipeline_colors.hpp"
 
 namespace fs = std::filesystem;
 
@@ -39,29 +38,28 @@ int main() {
     }
 
     vector<cv::Mat> color_images;
-    for (auto& image : resized_images) {
-        cv::medianBlur(image, image, 3);
-        color_images.push_back(image);
+    for (const auto& image : resized_images) {
+        cv::Mat color_image;
+        cv::medianBlur(image, color_image, 3);
+        color_images.push_back(color_image);
     }
 
     vector<cv::Mat> shape_images;
     for (auto& image : color_images) {
-        cv::cvtColor(image, image, cv::COLOR_BGR2GRAY);
-        cv::blur(image, image, cv::Size(5, 5));
+        cv::Mat shape_image;
+        cv::cvtColor(image, shape_image, cv::COLOR_BGR2GRAY);
+        cv::blur(shape_image, shape_image, cv::Size(5, 5));
 
         cv::Mat sobelX, sobelY, sobelMag;
-        cv::Sobel(image, sobelX, CV_64F, 1, 0, 3);
-        cv::Sobel(image, sobelY, CV_64F, 0, 1, 3);
-        cv::magnitude(sobelX, sobelY, image);
-        image.convertTo(image, CV_8U);
+        cv::Sobel(shape_image, sobelX, CV_64F, 1, 0, 3);
+        cv::Sobel(shape_image, sobelY, CV_64F, 0, 1, 3);
+        cv::magnitude(sobelX, sobelY, shape_image);
+        shape_image.convertTo(shape_image, CV_8U);
 
-        cv::threshold(image, image, 30, 255, cv::THRESH_BINARY);
-        shape_images.push_back(image);
+        cv::threshold(shape_image, shape_image, 30, 255, cv::THRESH_BINARY);
+        shape_images.push_back(shape_image);
     }
 
-    for (auto& image : shape_images) {
-        //basic_ops::show_image(image, "shape_image");
-    }
 
     vector<cv::Mat> stop_templates = basic_ops::load_images("../traffic_sign_templates/stop_signs/resized", 100);
     vector<cv::Mat> vf_templates = basic_ops::load_images("../traffic_sign_templates/vf_signs/resized", 100);
