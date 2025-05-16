@@ -1,5 +1,6 @@
 #include "header/color_detection.hpp"
 #include <stack>
+
 namespace cd {
     std::vector<std::vector<cv::Point>> get_blobs(cv::Mat mask) {
         CV_Assert(mask.type() == CV_8UC1);  // Expect a binary mask (1 channel)
@@ -11,13 +12,16 @@ namespace cd {
 
         std::vector<std::vector<cv::Point>> blobs;
 
-        for (int y = 0; y < height; ++y) {
-            for (int x = 0; x < width; ++x) {
-                if (mask.at<uint8_t>(y, x) == 1 && labels.at<int>(y, x) == 0) {
+        //cv::imshow("mask", mask);
+        //cv::waitKey(0);
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (static_cast<int>(mask.at<uint8_t>(y, x)) == 255 && labels.at<int>(y, x) == 0) {
                     std::stack<cv::Point> stack;
                     std::vector<cv::Point> blob;
 
-                    stack.push(cv::Point(x, y));
+                    stack.emplace(x, y);
 
                     while (!stack.empty()) {
                         cv::Point pt = stack.top();
@@ -29,17 +33,16 @@ namespace cd {
                         if (cx < 0 || cx >= width || cy < 0 || cy >= height)
                             continue;
 
-                        if (mask.at<uint8_t>(cy, cx) == 1 && labels.at<int>(cy, cx) == 0) {
+                        if(static_cast<int>(mask.at<uint8_t>(cy, cx)) == 255 && labels.at<int>(cy, cx) == 0) {
                             labels.at<int>(cy, cx) = label;
                             blob.push_back(pt);
 
-                            stack.push(cv::Point(cx + 1, cy));
-                            stack.push(cv::Point(cx - 1, cy));
-                            stack.push(cv::Point(cx, cy + 1));
-                            stack.push(cv::Point(cx, cy - 1));
+                            stack.emplace(cx + 1, cy);
+                            stack.emplace(cx - 1, cy);
+                            stack.emplace(cx, cy + 1);
+                            stack.emplace(cx, cy - 1);
                         }
                     }
-
                     blobs.push_back(blob);
                     ++label;
                 }
@@ -47,5 +50,4 @@ namespace cd {
         }
         return blobs;
     }
-
 }
