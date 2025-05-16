@@ -19,10 +19,20 @@ set(SOURCES
         src/colors.cpp
         src/shape_detection.cpp
         src/bounding_box.cpp
+        src/header/pipeline_colors.hpp
 )
 
 add_executable(${PROJECT_NAME}
-        src/pipelines/preprocessing.cpp)
+        src/pipelines/preprocessing.cpp
+        src/pipelines/pipeline_colors.cpp
+        src/colors.cpp
+        src/color_detection.cpp
+        src/bounding_box.cpp
+        src/basic_image_operations.cpp
+        src/statistical_operations.cpp
+        src/geometrical_image_operations.cpp
+        src/filters.cpp
+        src/shape_detection.cpp)
 
 target_link_libraries(${PROJECT_NAME}
         ${OpenCV_LIBS}
