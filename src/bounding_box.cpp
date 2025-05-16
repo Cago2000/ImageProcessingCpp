@@ -40,8 +40,6 @@ namespace bounding_box {
         int height = bottom - top + 1;
         int area = width * height;
 
-        std::cout << top << " " << left << " " << bottom << " " << right << " " << height << " " << width <<std::endl;
-
         if (area < min_box_area || area > max_box_area) return nullptr;
 
         double aspect_ratio = std::max(static_cast<double>(width)/height, static_cast<double>(height)/width);
