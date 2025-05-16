@@ -7,7 +7,7 @@
 #include "../header/bounding_box.hpp"
 
 namespace color_pipeline {
-    int start_pipeline_colors(std::vector<cv::Mat> color_images, std::vector<cv::Mat> resized_images) {
+    void start_pipeline_colors(std::vector<cv::Mat> color_images, std::vector<cv::Mat> resized_images) {
 
         std::vector<bool(*)(float, float, float)> color_functions = {
             colors::is_strong_red,
@@ -27,23 +27,28 @@ namespace color_pipeline {
                 const std::vector<std::vector<cv::Point>>& blobs = cd::get_blobs(mask);
                 cv::Vec3b box_color = colors::get_color_from_function(color_function);
                 std::vector<BoundingBox> bounding_boxes = bounding_box::create_bounding_boxes(blobs, i, min_box_area, max_box_area, box_color);
-                color_bounding_boxes.insert(color_bounding_boxes.end(), bounding_boxes.begin(), bounding_boxes.end());
+                for(auto bounding_box: bounding_boxes) {
+                    color_bounding_boxes.push_back(bounding_box);
+                }
             }
         }
 
-        color_bounding_boxes = bounding_box::merge_duplicate_boxes(color_bounding_boxes, 10);
+        std::cout << color_bounding_boxes.size() << std::endl;
+
+        //color_bounding_boxes = bounding_box::merge_duplicate_boxes(color_bounding_boxes, 10);
 
         std::vector<cv::Mat> bbox_images = resized_images;
 
+        for(auto bounding_box: color_bounding_boxes) {
+            std::cout << bounding_box.to_string() << std::endl;
+        }
+
         for (const BoundingBox& bbox : color_bounding_boxes) {
-            std::cout << "Hi" << std::endl;
             bbox_images[bbox.image_index] = bounding_box::draw_bounding_box(bbox, bbox_images[bbox.image_index]);
         }
 
         for (int i = 0; i < (int)bbox_images.size(); i++) {
             basic_ops::show_image(bbox_images[i], "color_bboxes_" + std::to_string(i));
         }
-
-        return 0;
     }
 }
