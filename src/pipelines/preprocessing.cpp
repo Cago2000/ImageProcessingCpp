@@ -5,7 +5,9 @@
 #include <filesystem>  // C++17
 #include "../header/basic_image_operations.hpp"
 #include "../header/geometrical_image_operations.hpp"
+#include "../header/pipeline_box_fusion.hpp"
 #include "../header/pipeline_colors.hpp"
+#include "../header/pipeline_shapes.hpp"
 
 namespace fs = std::filesystem;
 
@@ -22,7 +24,7 @@ int main() {
 
     vector<cv::Mat> original_images;
     for (const auto& folder : folders) {
-        vector<cv::Mat> images = basic_ops::load_images(folder, 100);
+        vector<cv::Mat> images = basic_ops::load_images(folder, 100, false);
         for (auto& image : images) {
             original_images.push_back(image);
         }
@@ -40,7 +42,7 @@ int main() {
     vector<cv::Mat> color_images;
     for (const auto& image : resized_images) {
         cv::Mat color_image;
-        cv::medianBlur(image, color_image, 3);
+        cv::medianBlur(image, color_image, 5);
         color_images.push_back(color_image);
     }
 
@@ -61,12 +63,14 @@ int main() {
     }
 
 
-    vector<cv::Mat> stop_templates = basic_ops::load_images("../traffic_sign_templates/stop_signs/resized", 100);
-    vector<cv::Mat> vf_templates = basic_ops::load_images("../traffic_sign_templates/vf_signs/resized", 100);
-    vector<cv::Mat> vfa_templates = basic_ops::load_images("../traffic_sign_templates/vfa_signs/resized", 100);
-    vector<cv::Mat> vfs_templates = basic_ops::load_images("../traffic_sign_templates/vfs_signs/resized", 100);
+    vector<cv::Mat> stop_templates = basic_ops::load_images("../traffic_sign_templates/stop_signs/resized", 100, false);
+    vector<cv::Mat> vf_templates = basic_ops::load_images("../traffic_sign_templates/vf_signs/resized", 100, false);
+    vector<cv::Mat> vfa_templates = basic_ops::load_images("../traffic_sign_templates/vfa_signs/resized", 100, false);
+    vector<cv::Mat> vfs_templates = basic_ops::load_images("../traffic_sign_templates/vfs_signs/resized", 100, false);
 
-    int i = color_pipeline::start_pipeline_colors(color_images, resized_images);
+    std::vector<BoundingBox> color_bounding_boxes = color_pipeline::start_pipeline_colors(color_images, resized_images);
+    std::vector<BoundingBox> shape_bounding_boxes = shape_pipeline::start_pipeline_shapes(shape_images, resized_images);
+    box_fusion_pipeline::start_pipeline_box_fusion(color_bounding_boxes, shape_bounding_boxes, resized_images);
 
     return 0;
 }
