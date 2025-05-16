@@ -24,7 +24,7 @@ namespace basic_ops {
         return image;
     }
 
-    cv::Mat load_image(const std::string& image_path) {
+    cv::Mat load_image(const std::string& image_path, bool print) {
         if (!fs::exists(image_path)) {
             std::cerr << "Error: File not found." << std::endl;
             return {};
@@ -37,18 +37,20 @@ namespace basic_ops {
         if (img.channels() == 3 && fs::path(image_path).extension() == ".pgm") {
             cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
         }
-        std::cout << "Image loaded from " << image_path << std::endl;
+        if (print) {
+            std::cout << "Image loaded from " << image_path << std::endl;
+        }
         return img;
     }
 
-    std::vector<cv::Mat> load_images(const std::string& folder_path, int amount) {
+    std::vector<cv::Mat> load_images(const std::string& folder_path, int amount, bool print) {
         std::vector<cv::Mat> images;
         for (const auto& entry : fs::directory_iterator(folder_path)) {
             std::string filename = entry.path().string();
             if (entry.path().extension() == ".jpg" || entry.path().extension() == ".jpeg" ||
                 entry.path().extension() == ".png" || entry.path().extension() == ".ppm" ||
                 entry.path().extension() == ".pgm") {
-                cv::Mat img = load_image(filename);
+                cv::Mat img = load_image(filename, print);
                 if (!img.empty()) images.push_back(img);
                 if (images.size() >= static_cast<size_t>(amount)) break;
                 }
@@ -56,9 +58,9 @@ namespace basic_ops {
         return images;
     }
 
-    void save_image(const cv::Mat& image, const std::string& save_path) {
+    void save_image(const cv::Mat& image, const std::string& save_path, bool print) {
         try {
-            if (cv::imwrite(save_path, image)) {
+            if (cv::imwrite(save_path, image) && print) {
                 std::cout << "Image saved at " << save_path << std::endl;
             } else {
                 throw std::runtime_error("cv::imwrite returned false");
@@ -68,21 +70,26 @@ namespace basic_ops {
         }
     }
 
-    void delete_image(const std::string& image_path) {
+    void delete_image(const std::string& image_path, bool print) {
         if (fs::exists(image_path)) {
             fs::remove(image_path);
-            std::cout << "Image deleted at " << image_path << std::endl;
+            if (print) {
+                std::cout << "Image deleted at " << image_path << std::endl;
+            }
         } else {
             std::cerr << "Error: File not found." << std::endl;
         }
     }
 
-    void show_image(const cv::Mat& image, const std::string& title) {
+    void show_image(const cv::Mat& image, const std::string& title, bool print) {
         if (!image.empty()) {
             cv::imshow(title, image);
             cv::waitKey(0);
             cv::destroyAllWindows();
-            std::cout << "Image displayed" << std::endl;
+            if (print) {
+                std::cout << "Image displayed" << std::endl;
+            }
+
         } else {
             std::cerr << "Error: Cannot display an empty image." << std::endl;
         }
