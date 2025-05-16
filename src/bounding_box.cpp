@@ -13,27 +13,34 @@ struct BoundingBox {
     cv::Vec3b box_color; // BGR color
     int image_index;
 
-    BoundingBox(int y, int x, const std::vector<int>& corners, int height, int width, int area, const cv::Vec3b& color, int idx)
+    BoundingBox(int y, int x, const std::vector<int> corners, int height, int width, int area, const cv::Vec3b& color, int idx)
         : center_y(y), center_x(x), box_corners(corners), box_height(height), box_width(width), box_area(area), box_color(color), image_index(idx) {}
+
 };
 
 namespace bounding_box {
-    BoundingBox* create_bounding_box(const std::vector<cv::Point>& blob, int image_index, int min_box_area, int max_box_area, const cv::Vec3b& box_color) {
+
+    BoundingBox* create_bounding_box(const std::vector<cv::Point>& blob, int image_index, int min_box_area, int max_box_area, cv::Vec3b box_color) {
         if (blob.empty()) return nullptr;
 
-        int top = blob[0].y, bottom = blob[0].y;
-        int left = blob[0].x, right = blob[0].x;
+        int left = std::numeric_limits<int>::max();
+        int right = std::numeric_limits<int>::min();
+        int top = std::numeric_limits<int>::max();
+        int bottom = std::numeric_limits<int>::min();
 
         for (const auto& pt : blob) {
-            top = std::min(top, pt.y);
-            bottom = std::max(bottom, pt.y);
             left = std::min(left, pt.x);
             right = std::max(right, pt.x);
+            top = std::min(top, pt.y);
+            bottom = std::max(bottom, pt.y);
         }
+
 
         int width = right - left + 1;
         int height = bottom - top + 1;
         int area = width * height;
+
+        std::cout << top << " " << left << " " << bottom << " " << right << " " << height << " " << width <<std::endl;
 
         if (area < min_box_area || area > max_box_area) return nullptr;
 
@@ -48,12 +55,28 @@ namespace bounding_box {
         return new BoundingBox(center_y, center_x, box_corners, height, width, area, box_color, image_index);
     }
 
+    std::vector<BoundingBox> create_bounding_boxes(const std::vector<std::vector<cv::Point>>& blobs,
+                                               int image_index, int min_box_area, int max_box_area,
+                                               cv::Vec3b& box_color) {
+        std::vector<BoundingBox> bounding_boxes;
+        for (const auto& blob : blobs) {
+            BoundingBox* bbox = create_bounding_box(blob, image_index, min_box_area, max_box_area, box_color);
+            if (bbox != nullptr) {
+                bounding_boxes.push_back(*bbox);
+                delete bbox;
+            }
+        }
+        return bounding_boxes;
+    }
+
     // Draw bounding box on image
     cv::Mat draw_bounding_box(const BoundingBox& box, cv::Mat& image) {
-        int top = std::clamp(box.box_corners[0], 0, image.rows - 1);
-        int left = std::clamp(box.box_corners[1], 0, image.cols - 1);
-        int bottom = std::clamp(box.box_corners[2], 0, image.rows - 1);
-        int right = std::clamp(box.box_corners[3], 0, image.cols - 1);
+        int top = box.box_corners[0];
+        int left = box.box_corners[1];
+        int bottom = box.box_corners[2];
+        int right = box.box_corners[3];
+
+        std::cout << top << " " << left << " " << bottom << " " << right << std::endl;
 
         // Draw horizontal lines
         for (int x = left; x <= right; ++x) {
@@ -102,7 +125,6 @@ namespace bounding_box {
         return new_boxes;
     }
 
-    // Merge duplicate boxes in a list
     std::vector<BoundingBox> merge_duplicate_boxes(const std::vector<BoundingBox>& boxes, int max_deviation) {
         std::vector<BoundingBox> merged_boxes;
         std::vector<bool> visited(boxes.size(), false);
@@ -121,8 +143,6 @@ namespace bounding_box {
                     visited[j] = true;
                     }
             }
-
-            // Compute averages
             std::vector<int> avg_corners(4, 0);
             for (int c = 0; c < 4; ++c) {
                 int sum_c = 0;
