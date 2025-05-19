@@ -7,7 +7,7 @@
 
 
 namespace shape_pipeline {
-    std::vector<BoundingBox> start_pipeline_shapes(std::vector<cv::Mat> shape_images, std::vector<cv::Mat> resized_images);
+    std::vector<BoundingBox> start_pipeline_shapes(std::vector<cv::Mat> shape_images);
 }
 
 #endif // SHAPE_PIPELINE_HPP
