@@ -7,7 +7,7 @@
 #include "../header/bounding_box.hpp"
 
 namespace color_pipeline {
-    std::vector<BoundingBox> start_pipeline_colors(std::vector<cv::Mat> color_images, std::vector<cv::Mat> resized_images) {
+    std::vector<BoundingBox> start_pipeline_colors(std::vector<cv::Mat> color_images) {
         std::vector<bool(*)(float, float, float)> color_functions = {
             colors::is_strong_red,
             colors::is_strong_yellow,
@@ -15,12 +15,12 @@ namespace color_pipeline {
         };
         std::vector<BoundingBox> color_bounding_boxes;
 
-        for (int i = 0; i < (int) color_images.size(); i++) {
+        for (size_t i = 0; i < color_images.size(); i++) {
             const cv::Mat& image = color_images[i];
             int height = image.size().height;
             int width = image.size().width;
             int min_box_area = static_cast<int>((height * 0.055) * (height * 0.055));
-            int max_box_area = (height * width) / 2;
+            int max_box_area = height * width;
             for (auto color_function : color_functions) {
                 cv::Mat mask = colors::get_mask(image, color_function);
                 const std::vector<std::vector<cv::Point>>& blobs = cd::get_blobs(mask);
@@ -31,17 +31,7 @@ namespace color_pipeline {
                 }
             }
         }
-
         color_bounding_boxes = bounding_box::merge_duplicate_boxes(color_bounding_boxes, 10);
-
-        std::vector<cv::Mat> bbox_images = resized_images;
-        for (const BoundingBox& bbox : color_bounding_boxes) {
-            //bbox_images[bbox.image_index] = bounding_box::draw_bounding_box(bbox, bbox_images[bbox.image_index]);
-        }
-
-        for (int i = 0; i < static_cast<int>(bbox_images.size()); i++) {
-            //basic_ops::show_image(bbox_images[i], "color_bboxes_" + std::to_string(i));
-        }
         return color_bounding_boxes;
     }
 }

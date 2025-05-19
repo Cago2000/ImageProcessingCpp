@@ -6,7 +6,7 @@
 #include "../header/pipeline_box_fusion.hpp"
 
 namespace box_fusion_pipeline {
-    void start_pipeline_box_fusion(std::vector<BoundingBox> color_bounding_boxes, std::vector<BoundingBox> shape_bounding_boxes, std::vector<cv::Mat> resized_images) {
+    std::vector<BoundingBox> start_pipeline_box_fusion(std::vector<BoundingBox> color_bounding_boxes, std::vector<BoundingBox> shape_bounding_boxes, std::vector<cv::Mat> resized_images) {
          std::vector<BoundingBox> bounding_boxes = bounding_box::fuse_bounding_box_matches(
             color_bounding_boxes, shape_bounding_boxes, 15
         );
@@ -26,5 +26,6 @@ namespace box_fusion_pipeline {
         for (const auto& img : bbox_images) {
             basic_ops::show_image(img, "traffic_sign_bboxes", false);
         }
+        return bounding_boxes;
     }
 }
