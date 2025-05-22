@@ -23,6 +23,12 @@ namespace box_fusion_pipeline {
             bbox_images[bounding_box.image_index] = bbox_image;
         }
 
+        std::cout << "Bounding Boxes: " <<bounding_boxes.size() << std::endl;
+        for (auto& bbox:bounding_boxes) {
+            std::cout << bbox.to_string() << std::endl;
+        }
+        std::cout << "\n" << std::endl;
+
         for (const auto& img : bbox_images) {
             basic_ops::show_image(img, "traffic_sign_bboxes", false);
         }

@@ -29,9 +29,9 @@ int main() {
     std::cout << "\n" << std::endl;
 
     std::vector<BoundingBox> bounding_boxes = box_fusion_pipeline::start_pipeline_box_fusion(color_bounding_boxes, shape_bounding_boxes, resized_images);
-    std::cout << "Bounding Boxes: " <<bounding_boxes.size() << std::endl;
+    /*std::cout << "Bounding Boxes: " <<bounding_boxes.size() << std::endl;
     for (auto& bbox:bounding_boxes) {
         std::cout << bbox.to_string() << std::endl;
     }
-    std::cout << "\n" << std::endl;
+    std::cout << "\n" << std::endl;*/
 }

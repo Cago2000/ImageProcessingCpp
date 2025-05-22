@@ -15,10 +15,11 @@ public:
     int box_width;
     int box_area;
     cv::Vec3b box_color;
+    std::string box_shape;
     int image_index;
 
     BoundingBox(int y, int x, std::vector<int> corners, int height, int width, int area,
-                cv::Vec3b box_color, int image_index);
+                 cv::Vec3b box_color, std::string shape, int image_index);
 
     std::string to_string() const {
         std::ostringstream oss;
@@ -34,6 +35,7 @@ public:
             << ", color=(B:" << static_cast<int>(box_color[0])
             << ", G:" << static_cast<int>(box_color[1])
             << ", R:" << static_cast<int>(box_color[2]) << ")"
+            << ", shape=" << box_shape
             << ")";
         return oss.str();
     }

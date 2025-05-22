@@ -52,9 +52,9 @@ namespace pipeline_preprocessing {
 
         std::vector<std::string> folders = {
             "../traffic_sign_images/vf",
-            "../traffic_sign_images/vfa",
-            "../traffic_sign_images/vfs",
-            "../traffic_sign_images/stop"
+            //"../traffic_sign_images/vfa",
+           // "../traffic_sign_images/vfs",
+            //"../traffic_sign_images/stop"
 
         };
 
