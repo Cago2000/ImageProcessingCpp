@@ -11,10 +11,11 @@ struct BoundingBox {
     int box_width;
     int box_area;
     cv::Vec3b box_color; // BGR color
+    std::string box_shape;
     int image_index;
 
-    BoundingBox(int y, int x, const std::vector<int> corners, int height, int width, int area, const cv::Vec3b& color, int idx)
-        : center_y(y), center_x(x), box_corners(corners), box_height(height), box_width(width), box_area(area), box_color(color), image_index(idx) {}
+    BoundingBox(int y, int x, const std::vector<int> corners, int height, int width, int area, const cv::Vec3b& color, std::string shape, int index)
+        : center_y(y), center_x(x), box_corners(corners), box_height(height), box_width(width), box_area(area),  box_color(color), box_shape(shape), image_index(index) {}
 
 };
 
@@ -35,6 +36,20 @@ namespace bounding_box {
             bottom = std::max(bottom, pt.y);
         }
 
+        std::vector<cv::Point> approx;
+        cv::approxPolyDP(blob, approx, 0.02 * cv::arcLength(blob, true), true);
+
+        std::string shape;
+        if(approx.size() <= 2){
+            shape = "Unknown";
+        }  else if (approx.size() == 3) {
+            shape = "Triangle";
+        } else if (approx.size() == 4) {
+            shape = "Rectangle";
+        } else if (approx.size() >= 5) {
+            shape = "Circle";
+        }
+        std::cout << approx.size() << " | " << shape << " | " << image_index << std::endl;
 
         int width = right - left + 1;
         int height = bottom - top + 1;
@@ -50,7 +65,7 @@ namespace bounding_box {
 
         std::vector<int> box_corners = {top, left, bottom, right};
 
-        return new BoundingBox(center_y, center_x, box_corners, height, width, area, box_color, image_index);
+        return new BoundingBox(center_y, center_x, box_corners, height, width, area, box_color, shape, image_index);
     }
 
     std::vector<BoundingBox> create_bounding_boxes(const std::vector<std::vector<cv::Point>>& blobs,
@@ -109,9 +124,10 @@ namespace bounding_box {
                 if (box1.box_color != cv::Vec3b(255, 255, 255)) new_color = box1.box_color;
                 if (box2.box_color != cv::Vec3b(255, 255, 255)) new_color = box2.box_color;
 
+                std::string new_shape = box1.box_shape;
                 int new_image_index = box1.image_index;
 
-                new_boxes.emplace_back(new_center_y, new_center_x, new_corners, new_height, new_width, new_area, new_color, new_image_index);
+                new_boxes.emplace_back(new_center_y, new_center_x, new_corners, new_height, new_width, new_area, new_color, new_shape, new_image_index);
             }
         }
 
@@ -169,11 +185,10 @@ namespace bounding_box {
                     break;
                 }
             }
-
+            std::string avg_shape = boxes[i].box_shape;
             int image_index = similar_boxes[0]->image_index;
 
-            merged_boxes.emplace_back(avg_center_y, avg_center_x, avg_corners,
-                                      avg_height, avg_width, avg_area, avg_color, image_index);
+            merged_boxes.emplace_back(avg_center_y, avg_center_x, avg_corners, avg_height, avg_width, avg_area, avg_color, avg_shape, image_index);
         }
 
         return merged_boxes;
