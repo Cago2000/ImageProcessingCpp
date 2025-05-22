@@ -32,6 +32,12 @@ namespace color_pipeline {
             }
         }
         color_bounding_boxes = bounding_box::merge_duplicate_boxes(color_bounding_boxes, 10);
+
+        std::cout << "Color Bounding Boxes: " << color_bounding_boxes.size() << std::endl;
+        for (auto& bbox:color_bounding_boxes) {
+            std::cout << bbox.to_string() << std::endl;
+        }
+        std::cout << "\n" << std::endl;
         return color_bounding_boxes;
     }
 }

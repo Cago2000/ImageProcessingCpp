@@ -27,6 +27,12 @@ namespace shape_pipeline {
 
         shape_bounding_boxes = bounding_box::merge_duplicate_boxes(shape_bounding_boxes, 10);
 
+        std::cout << "Shape Bounding Boxes: " << shape_bounding_boxes.size() << std::endl;
+        for (auto& bbox:shape_bounding_boxes) {
+            std::cout << bbox.to_string() << std::endl;
+        }
+        std::cout << "\n" << std::endl;
+
         return shape_bounding_boxes;
     }
 }

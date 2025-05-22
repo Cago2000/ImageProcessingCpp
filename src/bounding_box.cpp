@@ -49,7 +49,6 @@ namespace bounding_box {
         } else if (approx.size() >= 5) {
             shape = "Circle";
         }
-        std::cout << approx.size() << " | " << shape << " | " << image_index << std::endl;
 
         int width = right - left + 1;
         int height = bottom - top + 1;
