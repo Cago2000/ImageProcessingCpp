@@ -11,9 +11,9 @@ namespace shape_pipeline {
 
         for (size_t i = 0; i < shape_images.size(); i++) {
             const cv::Mat& image = shape_images[i];
-
-            std::vector<std::vector<cv::Point>> contours = sd::get_contours(image, 15);
-
+            //std::vector<std::vector<cv::Point>> contours = sd::get_contours(image, 15);
+            std::vector<std::vector<cv::Point> > contours;
+            findContours(image, contours, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
             int height = image.rows;
             int width = image.cols;
             cv::Vec3b box_color = {255, 255, 255};
