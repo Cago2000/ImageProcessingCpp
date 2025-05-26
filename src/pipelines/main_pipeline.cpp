@@ -10,13 +10,12 @@
 
 int main() {
 
-    std::vector<std::vector<cv::Mat>> images = pipeline_preprocessing::start_preprocessing_pipeline();
-    std::vector<cv::Mat> resized_images = images[0];
-    std::vector<cv::Mat> color_images = images[1];
-    std::vector<cv::Mat> shape_images = images[2];
+    std::unordered_map<std::string, std::vector<cv::Mat>> images = pipeline_preprocessing::start_preprocessing_pipeline();
+    std::vector<cv::Mat> resized_images = images["resized"];
+    std::vector<cv::Mat> color_images = images["color"];
+    std::vector<cv::Mat> shape_images = images["shape"];
 
     std::vector<BoundingBox> color_bounding_boxes = color_pipeline::start_pipeline_colors(color_images);
     std::vector<BoundingBox> shape_bounding_boxes = shape_pipeline::start_pipeline_shapes(shape_images);
     std::vector<BoundingBox> bounding_boxes = box_fusion_pipeline::start_pipeline_box_fusion(color_bounding_boxes, shape_bounding_boxes, resized_images);
-
 }

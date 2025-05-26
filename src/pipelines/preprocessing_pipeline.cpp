@@ -48,8 +48,7 @@ namespace pipeline_preprocessing {
         return shape_images;
     }
 
-    std::vector<std::vector<cv::Mat>> start_preprocessing_pipeline() {
-
+    std::unordered_map<std::string, std::vector<cv::Mat>> start_preprocessing_pipeline() {
         std::vector<std::string> folders = {
             "../traffic_sign_images/vf",
             //"../traffic_sign_images/vfa",
@@ -86,7 +85,11 @@ namespace pipeline_preprocessing {
         std::vector<cv::Mat> colors_template_images = preprocess_colors(base_templates);
         std::vector<cv::Mat> shape_template_images = preprocess_shapes(base_templates);*/
 
-        std::vector<std::vector<cv::Mat>> images = {resized_images, color_images, shape_images};
+        std::unordered_map<std::string, std::vector<cv::Mat>> images ={
+            {"resized", resized_images},
+            {"color", color_images},
+            {"shape", shape_images}
+        };
         return images;
     }
 }
