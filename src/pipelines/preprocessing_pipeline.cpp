@@ -48,6 +48,30 @@ namespace pipeline_preprocessing {
         return shape_images;
     }
 
+    std::vector<std::vector<cv::Mat>> preprocess_templates(const std::vector<std::vector<cv::Mat>>& templates) {
+        std::vector<std::vector<cv::Mat>> preprocessed_templates;
+        for (const auto& template_group : templates) {
+            std::vector<cv::Mat> preprocessed_template_group;
+            for (const auto& template_: template_group) {
+                cv::Mat preprocessed_template;
+                cv::cvtColor(template_, preprocessed_template, cv::COLOR_BGR2GRAY);
+                cv::blur(preprocessed_template, preprocessed_template, cv::Size(5, 5));
+
+                cv::Mat sobelX, sobelY, sobelMag;
+                cv::Sobel(preprocessed_template, sobelX, CV_64F, 1, 0, 3);
+                cv::Sobel(preprocessed_template, sobelY, CV_64F, 0, 1, 3);
+                cv::magnitude(sobelX, sobelY, preprocessed_template);
+                preprocessed_template.convertTo(preprocessed_template, CV_8U);
+
+                cv::threshold(preprocessed_template, preprocessed_template, 30, 255, cv::THRESH_BINARY);
+                preprocessed_template_group.push_back(preprocessed_template);
+            }
+            preprocessed_templates.push_back(preprocessed_template_group);
+        }
+        return preprocessed_templates;
+    }
+
+
     std::unordered_map<std::string, std::vector<cv::Mat>> start_preprocessing_pipeline() {
         std::vector<std::string> folders = {
             "../traffic_sign_images/vf",
@@ -56,6 +80,12 @@ namespace pipeline_preprocessing {
             //"../traffic_sign_images/stop"
 
         };
+
+        std::vector<cv::Mat> stop_templates = basic_ops::load_images("../traffic_sign_templates/stop_signs/resized", 100, true);
+        std::vector<cv::Mat> vf_templates = basic_ops::load_images("../traffic_sign_templates/vf_signs/resized", 100, true);
+        std::vector<cv::Mat> vfa_templates = basic_ops::load_images("../traffic_sign_templates/vfa_signs/resized", 100, true);
+        std::vector<cv::Mat> vfs_templates = basic_ops::load_images("../traffic_sign_templates/vfs_signs/resized", 100, true);
+        std::vector<std::vector<cv::Mat>> base_templates = {stop_templates, vf_templates, vfa_templates, vfs_templates};
 
         std::vector<cv::Mat> original_images;
         for (const auto& folder : folders) {
@@ -68,27 +98,16 @@ namespace pipeline_preprocessing {
         std::vector<cv::Mat> resized_images = preprocess_resizing(original_images);
         std::vector<cv::Mat> color_images = preprocess_colors(resized_images);
         std::vector<cv::Mat> shape_images = preprocess_shapes(resized_images);
-
-
-        /*std::vector<cv::Mat> stop_templates = basic_ops::load_images("../traffic_sign_templates/stop_signs/resized", 100, false);
-        std::vector<cv::Mat> vf_templates = basic_ops::load_images("../traffic_sign_templates/vf_signs/resized", 100, false);
-        std::vector<cv::Mat> vfa_templates = basic_ops::load_images("../traffic_sign_templates/vfa_signs/resized", 100, false);
-        std::vector<cv::Mat> vfs_templates = basic_ops::load_images("../traffic_sign_templates/vfs_signs/resized", 100, false);
-
-        cv::Mat stop = basic_ops::load_image("../traffic_sign_templates/stop_signs/stop.jpg", false);
-        cv::Mat vf = basic_ops::load_image("../traffic_sign_templates/vf_signs/vf.jpg", false);
-        cv::Mat vfa = basic_ops::load_image("../traffic_sign_templates/vfa_signs/vfa.jpg", false);
-        cv::Mat vfs = basic_ops::load_image("../traffic_sign_templates/vfs_signs/vfs.jpg", false);
-        std::vector<cv::Mat> base_templates = {stop, vf, vfa, vfs};
-
-        std::vector<cv::Mat> resized_template_images = base_templates;
-        std::vector<cv::Mat> colors_template_images = preprocess_colors(base_templates);
-        std::vector<cv::Mat> shape_template_images = preprocess_shapes(base_templates);*/
+        std::vector<std::vector<cv::Mat>> templates = preprocess_templates(base_templates);
 
         std::unordered_map<std::string, std::vector<cv::Mat>> images ={
             {"resized", resized_images},
             {"color", color_images},
-            {"shape", shape_images}
+            {"shape", shape_images},
+            {"stop_templates", templates[0]},
+            {"vf_templates", templates[1]},
+            {"vfa_templates", templates[2]},
+            {"vfs_templates", templates[3]}
         };
         return images;
     }

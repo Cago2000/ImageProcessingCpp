@@ -43,7 +43,9 @@ add_executable(${PROJECT_NAME}
         src/header/pipeline_box_fusion.hpp
         src/pipelines/main_pipeline.cpp
         src/header/main_pipeline.hpp
-        src/header/preprocessing_pipeline.hpp)
+        src/header/preprocessing_pipeline.hpp
+        src/pipelines/pipeline_template_matching.cpp
+        src/header/pipeline_template_matching.hpp)
 
 target_link_libraries(${PROJECT_NAME}
         ${OpenCV_LIBS}
