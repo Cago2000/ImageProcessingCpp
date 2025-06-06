@@ -18,10 +18,10 @@ namespace shape_pipeline {
             int width = image.cols;
             cv::Vec3b box_color = {255, 255, 255};
 
-            int min_box_area = static_cast<int>(pow(height * 0.055, 2));
+            int min_box_area = static_cast<int>(pow(height * 0.0275, 2));
             int max_box_area = height * width;
 
-            std::vector<BoundingBox> bounding_boxes = bounding_box::create_bounding_boxes(contours, i, min_box_area, max_box_area, box_color);
+            std::vector<BoundingBox> bounding_boxes = bounding_box::create_bounding_boxes(contours, i, min_box_area, max_box_area, box_color, "Unknown");
             shape_bounding_boxes.insert(shape_bounding_boxes.end(), bounding_boxes.begin(), bounding_boxes.end());
         }
 

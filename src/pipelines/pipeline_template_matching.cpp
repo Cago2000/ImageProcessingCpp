@@ -7,7 +7,7 @@
 namespace template_pipeline {
     std::vector<BoundingBox> start_pipeline_template_matching(std::vector<cv::Mat> shape_images, std::vector<std::vector<cv::Mat>> templates) {
         std::vector<BoundingBox> template_matching_bounding_boxes;
-        float confidence_threshold = 0.2f;
+        float confidence_threshold = 0.5f;
         for (size_t i = 0; i < shape_images.size(); i++) {
             std::vector<std::vector<cv::Point>> contours;
             const cv::Mat& image = shape_images[i];
@@ -56,7 +56,7 @@ namespace template_pipeline {
                     }
                 }
             }
-                std::vector<BoundingBox> bounding_boxes = bounding_box::create_bounding_boxes(contours, i, min_box_area, max_box_area, box_color);
+                std::vector<BoundingBox> bounding_boxes = bounding_box::create_bounding_boxes(contours, i, min_box_area, max_box_area, box_color, "Unknown");
                 template_matching_bounding_boxes.insert(template_matching_bounding_boxes.end(), bounding_boxes.begin(), bounding_boxes.end());
         }
 

@@ -19,13 +19,13 @@ namespace color_pipeline {
             const cv::Mat& image = color_images[i];
             int height = image.size().height;
             int width = image.size().width;
-            int min_box_area = static_cast<int>((height * 0.055) * (height * 0.055));
+            int min_box_area = static_cast<int>(pow(height * 0.0275, 2));
             int max_box_area = height * width;
             for (auto color_function : color_functions) {
                 cv::Mat mask = colors::get_mask(image, color_function);
                 const std::vector<std::vector<cv::Point>>& blobs = cd::get_blobs(mask);
                 cv::Vec3b box_color = colors::get_color_from_function(color_function);
-                std::vector<BoundingBox> bounding_boxes = bounding_box::create_bounding_boxes(blobs, i, min_box_area, max_box_area, box_color);
+                std::vector<BoundingBox> bounding_boxes = bounding_box::create_bounding_boxes(blobs, i, min_box_area, max_box_area, box_color, "Unknown");
                 for(auto bounding_box: bounding_boxes) {
                     color_bounding_boxes.push_back(bounding_box);
                 }

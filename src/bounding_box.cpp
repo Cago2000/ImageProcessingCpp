@@ -21,7 +21,7 @@ struct BoundingBox {
 
 namespace bounding_box {
 
-    BoundingBox* create_bounding_box(const std::vector<cv::Point>& blob, int image_index, int min_box_area, int max_box_area, cv::Vec3b box_color) {
+    BoundingBox* create_bounding_box(const std::vector<cv::Point>& blob, int image_index, int min_box_area, int max_box_area, cv::Vec3b box_color, std::string shape) {
         if (blob.empty()) return nullptr;
 
         int left = std::numeric_limits<int>::max();
@@ -38,17 +38,6 @@ namespace bounding_box {
 
         std::vector<cv::Point> approx;
         cv::approxPolyDP(blob, approx, 0.02 * cv::arcLength(blob, true), true);
-
-        std::string shape;
-        if(approx.size() <= 2){
-            shape = "Unknown";
-        }  else if (approx.size() == 3) {
-            shape = "Triangle";
-        } else if (approx.size() == 4) {
-            shape = "Rectangle";
-        } else if (approx.size() >= 5) {
-            shape = "Circle";
-        }
 
         int width = right - left + 1;
         int height = bottom - top + 1;
@@ -69,10 +58,10 @@ namespace bounding_box {
 
     std::vector<BoundingBox> create_bounding_boxes(const std::vector<std::vector<cv::Point>>& blobs,
                                                int image_index, int min_box_area, int max_box_area,
-                                               cv::Vec3b& box_color) {
+                                               cv::Vec3b& box_color, std::string shape) {
         std::vector<BoundingBox> bounding_boxes;
         for (const auto& blob : blobs) {
-            BoundingBox* bbox = create_bounding_box(blob, image_index, min_box_area, max_box_area, box_color);
+            BoundingBox* bbox = create_bounding_box(blob, image_index, min_box_area, max_box_area, box_color, shape);
             if (bbox != nullptr) {
                 bounding_boxes.push_back(*bbox);
                 delete bbox;
