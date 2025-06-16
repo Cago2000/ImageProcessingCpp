@@ -55,15 +55,6 @@ namespace pipeline_preprocessing {
             for (const auto& template_: template_group) {
                 cv::Mat preprocessed_template;
                 cv::cvtColor(template_, preprocessed_template, cv::COLOR_BGR2GRAY);
-                cv::blur(preprocessed_template, preprocessed_template, cv::Size(5, 5));
-
-                cv::Mat sobelX, sobelY, sobelMag;
-                cv::Sobel(preprocessed_template, sobelX, CV_64F, 1, 0, 3);
-                cv::Sobel(preprocessed_template, sobelY, CV_64F, 0, 1, 3);
-                cv::magnitude(sobelX, sobelY, preprocessed_template);
-                preprocessed_template.convertTo(preprocessed_template, CV_8U);
-
-                cv::threshold(preprocessed_template, preprocessed_template, 30, 255, cv::THRESH_BINARY);
                 preprocessed_template_group.push_back(preprocessed_template);
             }
             preprocessed_templates.push_back(preprocessed_template_group);
@@ -75,16 +66,16 @@ namespace pipeline_preprocessing {
     std::unordered_map<std::string, std::vector<cv::Mat>> start_preprocessing_pipeline() {
         std::vector<std::string> folders = {
             "../traffic_sign_images/vf",
-            "../traffic_sign_images/vfa",
-            "../traffic_sign_images/vfs",
-            "../traffic_sign_images/stop"
+           // "../traffic_sign_images/vfa",
+           // "../traffic_sign_images/vfs",
+           // "../traffic_sign_images/stop"
 
         };
 
-        std::vector<cv::Mat> stop_templates = basic_ops::load_images("../traffic_sign_templates/stop_signs/resized", 100, true);
-        std::vector<cv::Mat> vf_templates = basic_ops::load_images("../traffic_sign_templates/vf_signs/resized", 100, true);
-        std::vector<cv::Mat> vfa_templates = basic_ops::load_images("../traffic_sign_templates/vfa_signs/resized", 100, true);
-        std::vector<cv::Mat> vfs_templates = basic_ops::load_images("../traffic_sign_templates/vfs_signs/resized", 100, true);
+        std::vector<cv::Mat> stop_templates = basic_ops::load_images("../traffic_sign_templates/stop_signs/resized", 2, true);
+        std::vector<cv::Mat> vf_templates = basic_ops::load_images("../traffic_sign_templates/vf_signs/resized", 2, true);
+        std::vector<cv::Mat> vfa_templates = basic_ops::load_images("../traffic_sign_templates/vfa_signs/resized", 2, true);
+        std::vector<cv::Mat> vfs_templates = basic_ops::load_images("../traffic_sign_templates/vfs_signs/resized", 2, true);
         std::vector<std::vector<cv::Mat>> base_templates = {stop_templates, vf_templates, vfa_templates, vfs_templates};
 
         std::vector<cv::Mat> original_images;

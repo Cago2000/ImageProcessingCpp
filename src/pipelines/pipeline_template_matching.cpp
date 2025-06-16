@@ -3,11 +3,11 @@
 #include <vector>
 #include "../header/bounding_box.hpp"
 #include "../header/basic_image_operations.hpp"
+#include "../header/geometrical_image_operations.hpp"
 
 namespace template_pipeline {
     std::vector<BoundingBox> start_pipeline_template_matching(std::vector<cv::Mat> shape_images, std::vector<std::vector<cv::Mat>> templates) {
         std::vector<BoundingBox> template_matching_bounding_boxes;
-        float confidence_threshold = 0.5f;
         for (size_t i = 0; i < shape_images.size(); i++) {
             std::vector<std::vector<cv::Point>> contours;
             const cv::Mat& image = shape_images[i];
@@ -18,41 +18,61 @@ namespace template_pipeline {
             int min_box_area = static_cast<int>(pow(height * 0.055, 2));
             int max_box_area = height * width;
 
-            std::vector<double> rotation_angles = {-5, -3, 0, 3, 5};
+            std::vector<int> rotation_angles = {0};
+
+            cv::Mat gray_image;
+            cv::cvtColor(image, gray_image, cv::COLOR_BGR2GRAY);
 
             for (const auto& template_group : templates) {
                 for (const auto& template_img : template_group) {
-                    for (double angle : rotation_angles) {
-                        cv::Mat rotated_template;
-                        cv::Point2f center(template_img.cols / 2.0F, template_img.rows / 2.0F);
-                        cv::Mat rot_mat = cv::getRotationMatrix2D(center, angle, 1.0);
-                        cv::warpAffine(template_img, rotated_template, rot_mat, template_img.size(), cv::INTER_LINEAR, cv::BORDER_REPLICATE);
+                    for (int angle : rotation_angles) {
+                        cv::Mat rotated_template = geo_ops::rotate_image(template_img, angle);
+                        cv::Mat mask;
+                        cv::threshold(rotated_template, mask, 250, 255, cv::THRESH_BINARY_INV);
 
-                        if (rotated_template.rows > image.rows || rotated_template.cols > image.cols)
+                        int result_cols = gray_image.cols - rotated_template.cols + 1;
+                        int result_rows = gray_image.rows - rotated_template.rows + 1;
+                        cv::Mat result(result_rows, result_cols, CV_32FC1);
+
+                        cv::matchTemplate(gray_image, rotated_template, result, cv::TM_CCOEFF_NORMED, mask);
+                        //cv::normalize(result, result, 0, 1, cv::NORM_MINMAX, -1, cv::Mat());
+
+                        double minVal, maxVal;
+                        cv::Point minLoc, maxLoc, matchLoc;
+                        cv::minMaxLoc(result, &minVal, &maxVal, &minLoc, &maxLoc);
+                        matchLoc = maxLoc;
+
+                        std::cout << "Confidence (maxVal): " << maxVal
+                              << " | Angle: " << angle
+                              << " | MatchLoc: " << matchLoc
+                              << " | Template Size: " << rotated_template.cols << "x" << rotated_template.rows
+                              << std::endl;
+
+                        if(maxVal < 0.15) {
                             continue;
-
-                        cv::Mat match_result;
-                        cv::matchTemplate(image, rotated_template, match_result, cv::TM_CCOEFF_NORMED);
-
-                        cv::Mat threshold_mask;
-                        cv::threshold(match_result, threshold_mask, confidence_threshold, 255.0, cv::THRESH_BINARY);
-                        threshold_mask.convertTo(threshold_mask, CV_8U);
-
-                        std::vector<std::vector<cv::Point>> template_contours;
-                        cv::findContours(threshold_mask, template_contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-
-                        for (const auto& contour : template_contours) {
-                            cv::Rect bbox_rect = cv::boundingRect(contour);
-
-                            std::vector<cv::Point> box_contour = {
-                                cv::Point(bbox_rect.x, bbox_rect.y),
-                                cv::Point(bbox_rect.x + bbox_rect.width, bbox_rect.y),
-                                cv::Point(bbox_rect.x + bbox_rect.width, bbox_rect.y + bbox_rect.height),
-                                cv::Point(bbox_rect.x, bbox_rect.y + bbox_rect.height)
-                            };
-
-                            contours.push_back(box_contour);
                         }
+
+                        cv::Mat display;
+                        cv::cvtColor(gray_image, display, cv::COLOR_GRAY2BGR);
+                        cv::rectangle(display, matchLoc, cv::Point(matchLoc.x + template_img.cols, matchLoc.y + template_img.rows), cv::Scalar(0, 255, 0), 2);
+
+                        cv::imshow("Match Result", result);
+                        cv::imshow("Detected Match", display);
+                        cv::imshow("Template", rotated_template);
+                        cv::waitKey(0);
+
+
+
+                        int half_width = rotated_template.cols / 2;
+                        int half_height = rotated_template.rows / 2;
+
+                        std::vector<cv::Point> box_contour = {
+                            cv::Point(matchLoc.x - half_width, matchLoc.y - half_height),
+                            cv::Point(matchLoc.x + half_width, matchLoc.y - half_height),
+                            cv::Point(matchLoc.x + half_width, matchLoc.y + half_height),
+                            cv::Point(matchLoc.x - half_width, matchLoc.y + half_height)
+                        };
+                        contours.push_back(box_contour);
                     }
                 }
             }

@@ -23,7 +23,7 @@ int main() {
 
     std::vector<BoundingBox> color_bounding_boxes = color_pipeline::start_pipeline_colors(color_images);
     std::vector<BoundingBox> shape_bounding_boxes = shape_pipeline::start_pipeline_shapes(shape_images);
-    std::vector<BoundingBox> template_matching_bounding_boxes =  template_pipeline::start_pipeline_template_matching(shape_images, templates);
+    std::vector<BoundingBox> template_matching_bounding_boxes =  template_pipeline::start_pipeline_template_matching(color_images, templates);
     std::unordered_map<std::string, std::vector<BoundingBox>> bounding_boxes ={
         {"color", color_bounding_boxes},
         {"shape", shape_bounding_boxes},
