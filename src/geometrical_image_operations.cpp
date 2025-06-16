@@ -71,7 +71,6 @@ namespace geo_ops {
             }
         }
 
-        // Fill black holes by averaging neighbors
         for (int y = 0; y < new_height; ++y) {
             for (int x = 0; x < new_width; ++x) {
                 bool is_black;
@@ -83,7 +82,6 @@ namespace geo_ops {
                 }
                 if (!is_black) continue;
 
-                // Gather neighbors that are not black
                 std::vector<cv::Vec3d> neighbors;
                 for (int dy = -1; dy <= 1; ++dy) {
                     for (int dx = -1; dx <= 1; ++dx) {
@@ -131,6 +129,26 @@ namespace geo_ops {
         }
 
         return output;
+    }
+
+    cv::Mat rotate_image_cv(const cv::Mat& image, double angle) {
+        if (static_cast<int>(angle) % 360 == 0) {
+            return image.clone();
+        }
+
+        cv::Point2f center(image.cols / 2.0F, image.rows / 2.0F);
+        cv::Mat rot_mat = cv::getRotationMatrix2D(center, angle, 1.0);
+
+        // Compute bounding box size after rotation to prevent cropping
+        cv::Rect bbox = cv::RotatedRect(center, image.size(), angle).boundingRect();
+
+        // Adjust transformation matrix to consider translation
+        rot_mat.at<double>(0, 2) += bbox.width / 2.0 - center.x;
+        rot_mat.at<double>(1, 2) += bbox.height / 2.0 - center.y;
+
+        cv::Mat rotated;
+        cv::warpAffine(image, rotated, rot_mat, bbox.size(), cv::INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(255, 255, 255));
+        return rotated;
     }
 
     cv::Mat mirror_image(const cv::Mat& image, const std::string& mode) {

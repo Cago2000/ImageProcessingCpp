@@ -7,5 +7,7 @@ namespace geo_ops {
 
     cv::Mat rotate_image(const cv::Mat& image, int degree);
 
+    cv::Mat rotate_image_cv(const cv::Mat& image, double angle);
+
     cv::Mat mirror_image(const cv::Mat& image, const std::string& mode = "vertical");
 }

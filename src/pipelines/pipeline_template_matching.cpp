@@ -18,7 +18,7 @@ namespace template_pipeline {
             int min_box_area = static_cast<int>(pow(height * 0.055, 2));
             int max_box_area = height * width;
 
-            std::vector<int> rotation_angles = {0};
+            std::vector<int> rotation_angles = {-5, -3, 0, 3, 5};
 
             cv::Mat gray_image;
             cv::cvtColor(image, gray_image, cv::COLOR_BGR2GRAY);
@@ -26,7 +26,7 @@ namespace template_pipeline {
             for (const auto& template_group : templates) {
                 for (const auto& template_img : template_group) {
                     for (int angle : rotation_angles) {
-                        cv::Mat rotated_template = geo_ops::rotate_image(template_img, angle);
+                        cv::Mat rotated_template = geo_ops::rotate_image_cv(template_img, angle);
                         cv::Mat mask;
                         cv::threshold(rotated_template, mask, 250, 255, cv::THRESH_BINARY_INV);
 
@@ -59,6 +59,7 @@ namespace template_pipeline {
                         cv::imshow("Match Result", result);
                         cv::imshow("Detected Match", display);
                         cv::imshow("Template", rotated_template);
+                        cv::imshow("Mask", mask);
                         cv::waitKey(0);
 
 
