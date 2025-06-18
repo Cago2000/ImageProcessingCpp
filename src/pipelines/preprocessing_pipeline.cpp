@@ -34,14 +34,8 @@ namespace pipeline_preprocessing {
         for (auto& image : images) {
             cv::Mat shape_image;
             cv::cvtColor(image, shape_image, cv::COLOR_BGR2GRAY);
-            cv::blur(shape_image, shape_image, cv::Size(5, 5));
-
-            cv::Mat sobelX, sobelY, sobelMag;
-            cv::Sobel(shape_image, sobelX, CV_64F, 1, 0, 3);
-            cv::Sobel(shape_image, sobelY, CV_64F, 0, 1, 3);
-            cv::magnitude(sobelX, sobelY, shape_image);
-            shape_image.convertTo(shape_image, CV_8U);
-
+            cv::GaussianBlur(shape_image, shape_image, cv::Size(5, 5), 0);
+            cv::Canny(shape_image, shape_image, 100, 240);
             cv::threshold(shape_image, shape_image, 30, 255, cv::THRESH_BINARY);
             shape_images.push_back(shape_image);
         }

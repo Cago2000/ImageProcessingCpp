@@ -56,11 +56,11 @@ namespace template_pipeline {
                         cv::cvtColor(gray_image, display, cv::COLOR_GRAY2BGR);
                         cv::rectangle(display, matchLoc, cv::Point(matchLoc.x + template_img.cols, matchLoc.y + template_img.rows), cv::Scalar(0, 255, 0), 2);
 
-                        cv::imshow("Match Result", result);
+                        /*cv::imshow("Match Result", result);
                         cv::imshow("Detected Match", display);
                         cv::imshow("Template", rotated_template);
                         cv::imshow("Mask", mask);
-                        cv::waitKey(0);
+                        cv::waitKey(0);*/
 
 
 
@@ -77,7 +77,7 @@ namespace template_pipeline {
                     }
                 }
             }
-                std::vector<BoundingBox> bounding_boxes = bounding_box::create_bounding_boxes(contours, i, min_box_area, max_box_area, box_color, "Unknown");
+                std::vector<BoundingBox> bounding_boxes = bounding_box::create_bounding_boxes(contours, i, min_box_area, max_box_area, box_color);
                 template_matching_bounding_boxes.insert(template_matching_bounding_boxes.end(), bounding_boxes.begin(), bounding_boxes.end());
         }
 

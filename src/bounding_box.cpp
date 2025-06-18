@@ -21,15 +21,15 @@ struct BoundingBox {
 
 namespace bounding_box {
 
-    BoundingBox* create_bounding_box(const std::vector<cv::Point>& blob, int image_index, int min_box_area, int max_box_area, cv::Vec3b box_color, std::string shape) {
-        if (blob.empty()) return nullptr;
+    BoundingBox* create_bounding_box(const std::vector<cv::Point>& contour, int image_index, int min_box_area, int max_box_area, cv::Vec3b box_color) {
+        if (contour.empty()) return nullptr;
 
         int left = std::numeric_limits<int>::max();
         int right = std::numeric_limits<int>::min();
         int top = std::numeric_limits<int>::max();
         int bottom = std::numeric_limits<int>::min();
 
-        for (const auto& pt : blob) {
+        for (const auto& pt : contour) {
             left = std::min(left, pt.x);
             right = std::max(right, pt.x);
             top = std::min(top, pt.y);
@@ -37,7 +37,30 @@ namespace bounding_box {
         }
 
         std::vector<cv::Point> approx;
-        cv::approxPolyDP(blob, approx, 0.02 * cv::arcLength(blob, true), true);
+        cv::approxPolyDP(contour, approx, 0.08 * cv::arcLength(contour, true), true);
+        std::string shape;
+
+        const size_t vertices = approx.size();
+        switch (vertices) {
+            case 3:
+                shape = "Triangle";
+                break;
+            case 4: {
+                cv::Rect rect = cv::boundingRect(approx);
+                float aspectRatio = (float)rect.width / rect.height;
+                if (aspectRatio > 0.95 && aspectRatio < 1.05)
+                    shape = "Square or Diamond";
+                else
+                    shape = "Rectangle";
+                break;
+            }
+            case 8:
+                shape = "Octagon";
+                break;
+            default:
+                shape = "Unidentified shape";
+                break;
+        }
 
         int width = right - left + 1;
         int height = bottom - top + 1;
@@ -53,18 +76,22 @@ namespace bounding_box {
 
         std::vector<int> box_corners = {top, left, bottom, right};
 
+        /*std::cout << "vertices: " << vertices
+                  << ", Detected shape: " << shape
+                  << " with " << vertices << " simplified vertices at "
+                  << "(" << center_y << ", " << center_x << ")" << std::endl;*/
+
         return new BoundingBox(center_y, center_x, box_corners, height, width, area, box_color, shape, image_index);
     }
 
-    std::vector<BoundingBox> create_bounding_boxes(const std::vector<std::vector<cv::Point>>& blobs,
+    std::vector<BoundingBox> create_bounding_boxes(const std::vector<std::vector<cv::Point>>& contours,
                                                int image_index, int min_box_area, int max_box_area,
-                                               cv::Vec3b& box_color, std::string shape) {
+                                               cv::Vec3b& box_color) {
         std::vector<BoundingBox> bounding_boxes;
-        for (const auto& blob : blobs) {
-            BoundingBox* bbox = create_bounding_box(blob, image_index, min_box_area, max_box_area, box_color, shape);
+        for (const auto& contour : contours) {
+            BoundingBox* bbox = create_bounding_box(contour, image_index, min_box_area, max_box_area, box_color);
             if (bbox != nullptr) {
                 bounding_boxes.push_back(*bbox);
-                delete bbox;
             }
         }
         return bounding_boxes;

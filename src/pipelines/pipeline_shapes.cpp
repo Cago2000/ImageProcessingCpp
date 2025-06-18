@@ -11,7 +11,6 @@ namespace shape_pipeline {
 
         for (size_t i = 0; i < shape_images.size(); i++) {
             const cv::Mat& image = shape_images[i];
-            //std::vector<std::vector<cv::Point>> contours = sd::get_contours(image, 15);
             std::vector<std::vector<cv::Point> > contours;
             findContours(image, contours, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
             int height = image.rows;
@@ -21,7 +20,7 @@ namespace shape_pipeline {
             int min_box_area = static_cast<int>(pow(height * 0.0275, 2));
             int max_box_area = height * width;
 
-            std::vector<BoundingBox> bounding_boxes = bounding_box::create_bounding_boxes(contours, i, min_box_area, max_box_area, box_color, "Unknown");
+            std::vector<BoundingBox> bounding_boxes = bounding_box::create_bounding_boxes(contours, i, min_box_area, max_box_area, box_color);
             shape_bounding_boxes.insert(shape_bounding_boxes.end(), bounding_boxes.begin(), bounding_boxes.end());
         }
 

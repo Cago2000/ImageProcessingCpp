@@ -43,10 +43,10 @@ public:
 
 namespace bounding_box {
     BoundingBox create_bounding_box(const std::vector<cv::Point>& blob, int image_index,
-                                                   int min_box_area, int max_box_area, cv::Vec3b& box_color, std::string shape);
+                                                   int min_box_area, int max_box_area, cv::Vec3b& box_color);
 
-    std::vector<BoundingBox> create_bounding_boxes(const std::vector<std::vector<cv::Point>>& blobs, int image_index,
-                                                   int min_box_area, int max_box_area, cv::Vec3b& box_color, std::string shape);
+    std::vector<BoundingBox> create_bounding_boxes(const std::vector<std::vector<cv::Point>>& contours, int image_index,
+                                                   int min_box_area, int max_box_area, cv::Vec3b& box_color);
 
     cv::Mat draw_bounding_box(const BoundingBox& bounding_box, cv::Mat& image);
 
