@@ -1,27 +1,15 @@
 #include <opencv2/opencv.hpp>
+#include <utility>
 #include <vector>
 #include <algorithm>
-#include <numeric> // for std::accumulate
+#include <numeric>
+#include "header/bounding_box.hpp"
 
-struct BoundingBox {
-    int center_y;
-    int center_x;
-    std::vector<int> box_corners; // top, left, bottom, right
-    int box_height;
-    int box_width;
-    int box_area;
-    cv::Vec3b box_color; // BGR color
-    std::string box_shape;
-    int image_index;
-
-    BoundingBox(int y, int x, const std::vector<int> corners, int height, int width, int area, const cv::Vec3b& color, std::string shape, int index)
-        : center_y(y), center_x(x), box_corners(corners), box_height(height), box_width(width), box_area(area),  box_color(color), box_shape(shape), image_index(index) {}
-
-};
+#include <memory_resource>
 
 namespace bounding_box {
-
-    BoundingBox* create_bounding_box(const std::vector<cv::Point>& contour, int image_index, int min_box_area, int max_box_area, cv::Vec3b box_color) {
+    BoundingBox *create_bounding_box(const std::vector<cv::Point> &contour, int image_index, int min_box_area,
+                                     int max_box_area, cv::Vec3b &box_color, std::string sign) {
         if (contour.empty()) return nullptr;
 
         int left = std::numeric_limits<int>::max();
@@ -80,18 +68,19 @@ namespace bounding_box {
                   << ", Detected shape: " << shape
                   << " with " << vertices << " simplified vertices at "
                   << "(" << center_y << ", " << center_x << ")" << std::endl;*/
-
-        return new BoundingBox(center_y, center_x, box_corners, height, width, area, box_color, shape, image_index);
+        BoundingBox* bbox = new BoundingBox(center_y, center_x, box_corners, height, width, area, box_color, shape, std::move(sign), image_index);
+        return bbox;
     }
 
     std::vector<BoundingBox> create_bounding_boxes(const std::vector<std::vector<cv::Point>>& contours,
                                                int image_index, int min_box_area, int max_box_area,
-                                               cv::Vec3b& box_color) {
+                                               cv::Vec3b& box_color, std::string sign) {
         std::vector<BoundingBox> bounding_boxes;
         for (const auto& contour : contours) {
-            BoundingBox* bbox = create_bounding_box(contour, image_index, min_box_area, max_box_area, box_color);
+            BoundingBox* bbox = create_bounding_box(contour, image_index, min_box_area, max_box_area, box_color, sign);
             if (bbox != nullptr) {
                 bounding_boxes.push_back(*bbox);
+                delete bbox;
             }
         }
         return bounding_boxes;
@@ -142,7 +131,12 @@ namespace bounding_box {
                 std::string new_shape = box1.box_shape;
                 int new_image_index = box1.image_index;
 
-                new_boxes.emplace_back(new_center_y, new_center_x, new_corners, new_height, new_width, new_area, new_color, new_shape, new_image_index);
+                std::string new_box_sign = box1.box_sign;
+                if (box1.box_sign.empty()) {
+                    new_box_sign = box2.box_sign;
+                }
+
+                new_boxes.emplace_back(new_center_y, new_center_x, new_corners, new_height, new_width, new_area, new_color, new_shape, new_box_sign, new_image_index);
             }
         }
 
@@ -201,9 +195,17 @@ namespace bounding_box {
                 }
             }
             std::string avg_shape = boxes[i].box_shape;
+
             int image_index = similar_boxes[0]->image_index;
 
-            merged_boxes.emplace_back(avg_center_y, avg_center_x, avg_corners, avg_height, avg_width, avg_area, avg_color, avg_shape, image_index);
+            std::string box_sign;
+            for (const auto& bbox: similar_boxes) {
+                if (!bbox->box_sign.empty()) {
+                    box_sign = bbox->box_sign;
+                    break;
+                }
+            }
+            merged_boxes.emplace_back(avg_center_y, avg_center_x, avg_corners, avg_height, avg_width, avg_area, avg_color, avg_shape, box_sign, image_index);
         }
 
         return merged_boxes;

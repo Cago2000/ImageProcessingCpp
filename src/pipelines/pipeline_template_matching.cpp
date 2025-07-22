@@ -6,8 +6,9 @@
 #include "../header/geometrical_image_operations.hpp"
 
 namespace template_pipeline {
-    std::vector<BoundingBox> start_pipeline_template_matching(std::vector<cv::Mat> shape_images, std::vector<std::vector<cv::Mat>> templates) {
+    std::vector<BoundingBox> start_pipeline_template_matching(std::vector<cv::Mat> shape_images, const std::unordered_map<std::string, std::vector<cv::Mat>>& templates) {
         std::vector<BoundingBox> template_matching_bounding_boxes;
+        std::vector<BoundingBox> bounding_boxes;
         for (size_t i = 0; i < shape_images.size(); i++) {
             std::vector<std::vector<cv::Point>> contours;
             const cv::Mat& image = shape_images[i];
@@ -23,8 +24,8 @@ namespace template_pipeline {
             cv::Mat gray_image;
             cv::cvtColor(image, gray_image, cv::COLOR_BGR2GRAY);
 
-            for (const auto& template_group : templates) {
-                for (const auto& template_img : template_group) {
+            for (const auto& [sign, template_group] : templates) {
+                for (const auto& template_img : template_group){
                     for (int angle : rotation_angles) {
                         cv::Mat rotated_template = geo_ops::rotate_image_cv(template_img, angle);
                         cv::Mat mask;
@@ -73,12 +74,12 @@ namespace template_pipeline {
                             cv::Point(matchLoc.x + half_width, matchLoc.y + half_height),
                             cv::Point(matchLoc.x - half_width, matchLoc.y + half_height)
                         };
-                        contours.push_back(box_contour);
+                        BoundingBox* bbox = bounding_box::create_bounding_box(box_contour, i, min_box_area, max_box_area, box_color, sign);
+                        bounding_boxes.push_back(*bbox);
                     }
                 }
             }
-                std::vector<BoundingBox> bounding_boxes = bounding_box::create_bounding_boxes(contours, i, min_box_area, max_box_area, box_color);
-                template_matching_bounding_boxes.insert(template_matching_bounding_boxes.end(), bounding_boxes.begin(), bounding_boxes.end());
+            template_matching_bounding_boxes.insert(template_matching_bounding_boxes.end(), bounding_boxes.begin(), bounding_boxes.end());
         }
 
         template_matching_bounding_boxes = bounding_box::merge_duplicate_boxes(template_matching_bounding_boxes, 10);

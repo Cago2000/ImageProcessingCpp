@@ -4,9 +4,8 @@
 #include "../header/pipeline_shapes.hpp"
 #include "../header/pipeline_template_matching.hpp"
 #include "../header/pipeline_box_fusion.hpp"
-
 #include <opencv2/opencv.hpp>
-
+#include "../header/basic_image_operations.hpp"
 #include "../header/preprocessing_pipeline.hpp"
 
 int main() {
@@ -19,7 +18,12 @@ int main() {
     std::vector<cv::Mat> vf_templates = images["vf_templates"];
     std::vector<cv::Mat> vfa_templates = images["vfa_templates"];
     std::vector<cv::Mat> vfs_templates = images["vfs_templates"];
-    std::vector<std::vector<cv::Mat>> templates = {stop_templates, vf_templates, vfa_templates, vfs_templates};
+    std::unordered_map<std::string, std::vector<cv::Mat>> templates = {
+        {"stop", stop_templates},
+        {"vf", vf_templates},
+        {"vfa", vfa_templates},
+        {"vfs", vfs_templates}
+    };
 
     std::vector<BoundingBox> color_bounding_boxes = color_pipeline::start_pipeline_colors(color_images);
     std::vector<BoundingBox> shape_bounding_boxes = shape_pipeline::start_pipeline_shapes(shape_images);

@@ -7,5 +7,5 @@
 
 
 namespace template_pipeline {
-    std::vector<BoundingBox> start_pipeline_template_matching(std::vector<cv::Mat> shape_images, std::vector<std::vector<cv::Mat>> templates);
+    std::vector<BoundingBox> start_pipeline_template_matching(std::vector<cv::Mat> shape_images, const std::unordered_map<std::string, std::vector<cv::Mat>>& templates);
 }

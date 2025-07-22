@@ -67,7 +67,7 @@ namespace pipeline_preprocessing {
         };
 
         std::vector<cv::Mat> stop_templates = basic_ops::load_images("../traffic_sign_templates/stop_signs/resized", 2, true);
-        std::vector<cv::Mat> vf_templates = basic_ops::load_images("../traffic_sign_templates/vf_signs/resized", 2, true);
+        std::vector<cv::Mat> vf_templates = basic_ops::load_images("../traffic_sign_templates/vf_signs/arrows", 2, true);
         std::vector<cv::Mat> vfa_templates = basic_ops::load_images("../traffic_sign_templates/vfa_signs/resized", 2, true);
         std::vector<cv::Mat> vfs_templates = basic_ops::load_images("../traffic_sign_templates/vfs_signs/resized", 2, true);
         std::vector<std::vector<cv::Mat>> base_templates = {stop_templates, vf_templates, vfa_templates, vfs_templates};

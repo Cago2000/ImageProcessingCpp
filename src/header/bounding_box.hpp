@@ -1,9 +1,7 @@
 #ifndef BOUNDING_BOX_HPP
 #define BOUNDING_BOX_HPP
-
+#include <utility>
 #include <vector>
-#include <array>
-#include <optional>
 #include <opencv2/opencv.hpp>
 
 class BoundingBox {
@@ -16,10 +14,13 @@ public:
     int box_area;
     cv::Vec3b box_color;
     std::string box_shape;
+    std::string box_sign;
     int image_index;
 
-    BoundingBox(int y, int x, std::vector<int> corners, int height, int width, int area,
-                 cv::Vec3b box_color, std::string shape, int image_index);
+    BoundingBox(int y, int x, const std::vector<int> corners, int height, int width, int area,
+                const cv::Vec3b& color, std::string shape, std::string sign, int index)
+        : center_y(y), center_x(x), box_corners(corners), box_height(height), box_width(width),
+          box_area(area), box_color(color), box_shape(std::move(shape)), box_sign(std::move(sign)), image_index(index) {}
 
     std::string to_string() const {
         std::ostringstream oss;
@@ -36,17 +37,18 @@ public:
             << ", G:" << static_cast<int>(box_color[1])
             << ", R:" << static_cast<int>(box_color[2]) << ")"
             << ", shape=" << box_shape
+            << ", sign=" << box_sign
             << ")";
         return oss.str();
     }
 };
 
 namespace bounding_box {
-    BoundingBox create_bounding_box(const std::vector<cv::Point>& blob, int image_index,
-                                                   int min_box_area, int max_box_area, cv::Vec3b& box_color);
+    BoundingBox *create_bounding_box(const std::vector<cv::Point> &contour, int image_index,
+                                     int min_box_area, int max_box_area, cv::Vec3b &box_color, std::string sign);
 
     std::vector<BoundingBox> create_bounding_boxes(const std::vector<std::vector<cv::Point>>& contours, int image_index,
-                                                   int min_box_area, int max_box_area, cv::Vec3b& box_color);
+                                                   int min_box_area, int max_box_area, cv::Vec3b& box_color, std::string sign);
 
     cv::Mat draw_bounding_box(const BoundingBox& bounding_box, cv::Mat& image);
 
