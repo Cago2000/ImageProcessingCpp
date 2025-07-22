@@ -16,7 +16,7 @@ namespace box_fusion_pipeline {
             color_bounding_boxes, shape_bounding_boxes, 10
         );
 
-        fused_bounding_boxes = bounding_box::fuse_bounding_box_matches(fused_bounding_boxes, template_bounding_boxes, 10);
+        //fused_bounding_boxes = bounding_box::fuse_bounding_box_matches(fused_bounding_boxes, template_bounding_boxes, 10);
 
         fused_bounding_boxes = bounding_box::merge_duplicate_boxes(fused_bounding_boxes, 10);
 

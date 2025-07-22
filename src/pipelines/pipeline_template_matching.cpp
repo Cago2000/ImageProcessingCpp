@@ -49,7 +49,7 @@ namespace template_pipeline {
                               << " | Template Size: " << rotated_template.cols << "x" << rotated_template.rows
                               << std::endl;
 
-                        if(maxVal < 0.15) {
+                        if(maxVal < 0.7) {
                             continue;
                         }
 
