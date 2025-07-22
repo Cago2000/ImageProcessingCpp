@@ -60,9 +60,9 @@ namespace pipeline_preprocessing {
     std::unordered_map<std::string, std::vector<cv::Mat>> start_preprocessing_pipeline() {
         std::vector<std::string> folders = {
             "../traffic_sign_images/vf",
-           // "../traffic_sign_images/vfa",
-           // "../traffic_sign_images/vfs",
-           // "../traffic_sign_images/stop"
+            "../traffic_sign_images/vfa",
+            "../traffic_sign_images/vfs",
+            "../traffic_sign_images/stop"
 
         };
 
