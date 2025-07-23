@@ -39,12 +39,12 @@ namespace shape_pipeline {
             );
 
             //debug
-            cv::Mat image_copy = image.clone();
+            /*cv::Mat image_copy = image.clone();
             cv::cvtColor(image_copy, image_copy, cv::COLOR_GRAY2BGR);
             for (const BoundingBox& bounding_box : bounding_boxes) {
                 bounding_box::draw_bounding_box(bounding_box, image_copy, {0, 255, 0});
             }
-            basic_ops::show_image(image_copy, "Image " + std::to_string(i));
+            basic_ops::show_image(image_copy, "Image " + std::to_string(i));*/
         }
 
         shape_bounding_boxes = bounding_box::merge_duplicate_boxes(shape_bounding_boxes, 10);

@@ -6,13 +6,13 @@
 #include "../header/geometrical_image_operations.hpp"
 
 namespace template_pipeline {
-    std::vector<BoundingBox> start_pipeline_template_matching(std::vector<cv::Mat> shape_images, const std::unordered_map<std::string, std::vector<cv::Mat>>& templates) {
+    std::vector<BoundingBox> start_pipeline_template_matching(std::vector<cv::Mat> images, const std::unordered_map<std::string, std::vector<cv::Mat>>& templates) {
         std::vector<BoundingBox> template_matching_bounding_boxes;
         std::vector<BoundingBox> bounding_boxes;
-        for (size_t i = 0; i < shape_images.size(); i++) {
-            std::cout << "Image #" << i << " " << shape_images[i].cols << "x" << shape_images[i].rows <<std::endl;
+        for (size_t i = 0; i < images.size(); i++) {
+            std::cout << "Image #" << i << " " << images[i].cols << "x" << images[i].rows <<std::endl;
             std::vector<std::vector<cv::Point>> contours;
-            const cv::Mat& image = shape_images[i];
+            const cv::Mat& image = images[i];
             int height = image.rows;
             int width = image.cols;
             cv::Vec3b box_color = {255, 255, 255};

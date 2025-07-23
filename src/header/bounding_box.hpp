@@ -56,6 +56,8 @@ namespace bounding_box {
                                                        const std::vector<BoundingBox>& boxes2, int max_deviation);
 
     std::vector<BoundingBox> merge_duplicate_boxes(const std::vector<BoundingBox>& boxes, int max_deviation);
+
+    std::vector<cv::Mat> get_roi(const std::vector<cv::Mat>& images, const std::vector<BoundingBox>& bounding_boxes, int min_area, int margin);
 }
 
 #endif // BOUNDING_BOX_HPP

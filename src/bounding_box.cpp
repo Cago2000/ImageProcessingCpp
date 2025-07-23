@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <numeric>
 #include "header/bounding_box.hpp"
-
+#include "header/basic_image_operations.hpp""
 #include <memory_resource>
 
 namespace bounding_box {
@@ -211,5 +211,21 @@ namespace bounding_box {
         }
 
         return merged_boxes;
+    }
+
+
+    std::vector<cv::Mat> get_roi(const std::vector<cv::Mat>& images, const std::vector<BoundingBox>& bounding_boxes, int min_area, int margin) {
+        std::vector<cv::Mat> cropped_images;
+        for (const auto& bounding_box: bounding_boxes) {
+            if (bounding_box.box_area < min_area) {continue;}
+            cv::Mat color_image_copy = images[bounding_box.image_index].clone();
+            draw_bounding_box(bounding_box, color_image_copy, bounding_box.box_color);
+            cv::Point topLeft(bounding_box.box_corners[1]-margin, bounding_box.box_corners[0]-margin);
+            cv::Point bottomRight(bounding_box.box_corners[3]+margin, bounding_box.box_corners[2]+margin);
+            cv::Rect roi(topLeft, bottomRight);
+            cv::Mat crop = images[bounding_box.image_index].clone()(roi);
+            cropped_images.push_back(crop);
+        }
+        return cropped_images;
     }
 }
