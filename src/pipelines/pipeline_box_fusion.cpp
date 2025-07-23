@@ -1,4 +1,5 @@
 #include <opencv2/opencv.hpp>
+#include <utility>
 #include <vector>
 #include <iostream>
 #include "../header/bounding_box.hpp"
@@ -13,19 +14,16 @@ namespace box_fusion_pipeline {
         std::vector<BoundingBox> template_bounding_boxes = bounding_boxes["template"];
 
         std::vector<BoundingBox> fused_bounding_boxes = bounding_box::fuse_bounding_box_matches(
-            color_bounding_boxes, shape_bounding_boxes, 10
+            color_bounding_boxes, shape_bounding_boxes, 20
         );
 
-        fused_bounding_boxes = bounding_box::fuse_bounding_box_matches(fused_bounding_boxes, template_bounding_boxes, 10);
+        fused_bounding_boxes = bounding_box::fuse_bounding_box_matches(fused_bounding_boxes, template_bounding_boxes, 20);
 
-        fused_bounding_boxes = bounding_box::merge_duplicate_boxes(fused_bounding_boxes, 10);
+        fused_bounding_boxes = bounding_box::merge_duplicate_boxes(fused_bounding_boxes, 20);
 
 
         for (auto& bounding_box : fused_bounding_boxes) {
             if (!bounding_box.box_sign.empty()){continue;}
-            if (bounding_box.box_color == cv::Vec3b(0, 0, 255)) {
-                std::cout << "box color match!" << std::endl;
-            }
             if (bounding_box.box_color == cv::Vec3b(0, 0, 255) && bounding_box.box_shape == "Triangle") {
                 bounding_box.box_sign = "vfa";
             }
@@ -37,9 +35,9 @@ namespace box_fusion_pipeline {
             }
         }
 
-        std::vector<cv::Mat> bbox_images = resized_images;
+        std::vector<cv::Mat> bbox_images = std::move(resized_images);
         for (auto& bounding_box : fused_bounding_boxes) {
-            cv::Mat bbox_image = bounding_box::draw_bounding_box(bounding_box, bbox_images[bounding_box.image_index]);
+            cv::Mat bbox_image = bounding_box::draw_bounding_box(bounding_box, bbox_images[bounding_box.image_index], bounding_box.box_color);
             bbox_images[bounding_box.image_index] = bbox_image;
         }
 

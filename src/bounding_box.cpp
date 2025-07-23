@@ -25,28 +25,29 @@ namespace bounding_box {
         }
 
         std::vector<cv::Point> approx;
-        cv::approxPolyDP(contour, approx, 0.08 * cv::arcLength(contour, true), true);
+        cv::approxPolyDP(contour, approx, 0.05 * cv::arcLength(contour, true), true);
         std::string shape;
 
         const size_t vertices = approx.size();
+
         switch (vertices) {
             case 3:
-                shape = "Triangle";
+                shape = "Triangle " + std::to_string(vertices);
                 break;
             case 4: {
                 cv::Rect rect = cv::boundingRect(approx);
                 float aspectRatio = (float)rect.width / rect.height;
                 if (aspectRatio > 0.95 && aspectRatio < 1.05)
-                    shape = "Square or Diamond";
+                    shape = "Square or Diamond " + std::to_string(vertices);
                 else
-                    shape = "Rectangle";
+                    shape = "Rectangle " + std::to_string(vertices);
                 break;
             }
             case 8:
-                shape = "Octagon";
+                shape = "Octagon " + std::to_string(vertices);
                 break;
             default:
-                shape = "Unidentified shape";
+                shape = "Unidentified shape " + std::to_string(vertices);
                 break;
         }
 
@@ -86,7 +87,8 @@ namespace bounding_box {
         return bounding_boxes;
     }
 
-    cv::Mat draw_bounding_box(const BoundingBox& box, cv::Mat& image) {
+    cv::Mat draw_bounding_box(const BoundingBox& box, cv::Mat& image, const cv::Vec3b& color = {255, 255, 255}) {
+
         int top = box.box_corners[0];
         int left = box.box_corners[1];
         int bottom = box.box_corners[2];
@@ -94,12 +96,12 @@ namespace bounding_box {
 
 
         for (int x = left; x <= right; ++x) {
-            image.at<cv::Vec3b>(top, x) = box.box_color;
-            image.at<cv::Vec3b>(bottom, x) = box.box_color;
+            image.at<cv::Vec3b>(top, x) = color;
+            image.at<cv::Vec3b>(bottom, x) = color;
         }
         for (int y = top; y <= bottom; ++y) {
-            image.at<cv::Vec3b>(y, left) = box.box_color;
-            image.at<cv::Vec3b>(y, right) = box.box_color;
+            image.at<cv::Vec3b>(y, left) = color;
+            image.at<cv::Vec3b>(y, right) = color;
         }
         return image;
     }

@@ -26,7 +26,7 @@ namespace template_pipeline {
             cv::cvtColor(image, gray_image, cv::COLOR_BGR2GRAY);
 
             for (const auto& [sign, template_group] : templates) {
-                std::cout << sign << std::endl;
+                //debug std::cout << sign << std::endl;
                 for (const auto& template_img : template_group){
                     for (int angle : rotation_angles) {
                         cv::Mat rotated_template = geo_ops::rotate_image_cv(template_img, angle);
@@ -52,25 +52,27 @@ namespace template_pipeline {
                         cv::minMaxLoc(result, &minVal, &maxVal, &minLoc, &maxLoc);
                         matchLoc = maxLoc;
 
+                        /*//debug
                         std::cout << "Confidence (maxVal): " << maxVal
                               << " | Angle: " << angle
                               << " | MatchLoc: " << matchLoc
                               << " | Template Size: " << rotated_template.cols << "x" << rotated_template.rows
-                              << std::endl;
+                              << std::endl;*/
 
                         cv::Mat display;
                         cv::cvtColor(gray_image, display, cv::COLOR_GRAY2BGR);
                         cv::rectangle(display, matchLoc, cv::Point(matchLoc.x + template_img.cols, matchLoc.y + template_img.rows), cv::Scalar(0, 255, 0), 2);
 
-                        if(maxVal < 0.45 || maxVal > 1.0) {
+                        if(maxVal < 0.25 || maxVal > 1.0) {
                             continue;
                         }
 
+                        /*//debug
                         cv::imshow("Match Result", result);
                         cv::imshow("Detected Match", display);
                         cv::imshow("Template", rotated_template);
                         cv::imshow("Mask", mask_copy);
-                        cv::waitKey(0);
+                        cv::waitKey(0);*/
 
                         int half_width = static_cast<int>(rotated_template.cols / 2);
                         int half_height =static_cast<int>( rotated_template.rows / 2);
@@ -88,7 +90,7 @@ namespace template_pipeline {
                         }
                     }
                 }
-                std::cout << std::endl;
+                //debug std::cout << std::endl;
             }
             template_matching_bounding_boxes.insert(template_matching_bounding_boxes.end(), bounding_boxes.begin(), bounding_boxes.end());
         }
