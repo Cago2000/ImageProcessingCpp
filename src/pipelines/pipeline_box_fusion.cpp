@@ -13,13 +13,29 @@ namespace box_fusion_pipeline {
         std::vector<BoundingBox> template_bounding_boxes = bounding_boxes["template"];
 
         std::vector<BoundingBox> fused_bounding_boxes = bounding_box::fuse_bounding_box_matches(
-            color_bounding_boxes, shape_bounding_boxes, 10
+            color_bounding_boxes, shape_bounding_boxes, 20
         );
 
-        //fused_bounding_boxes = bounding_box::fuse_bounding_box_matches(fused_bounding_boxes, template_bounding_boxes, 10);
+        fused_bounding_boxes = bounding_box::fuse_bounding_box_matches(fused_bounding_boxes, template_bounding_boxes, 20);
 
         fused_bounding_boxes = bounding_box::merge_duplicate_boxes(fused_bounding_boxes, 10);
 
+
+        for (auto& bounding_box : fused_bounding_boxes) {
+            if (!bounding_box.box_sign.empty()){continue;}
+            if (bounding_box.box_color == cv::Vec3b(0, 0, 255)) {
+                std::cout << "box color match!" << std::endl;
+            }
+            if (bounding_box.box_color == cv::Vec3b(0, 0, 255) && bounding_box.box_shape == "Triangle") {
+                bounding_box.box_sign = "vfa";
+            }
+            if (bounding_box.box_color == cv::Vec3b(0, 255, 255) && bounding_box.box_shape == "Square or Diamond") {
+                bounding_box.box_sign = "vfs";
+            }
+            if (bounding_box.box_color == cv::Vec3b(0, 0, 255) && bounding_box.box_shape == "Octagon") {
+                bounding_box.box_sign = "stop";
+            }
+        }
 
         std::vector<cv::Mat> bbox_images = resized_images;
         for (auto& bounding_box : fused_bounding_boxes) {

@@ -50,9 +50,9 @@ namespace basic_ops {
             if (entry.path().extension() == ".jpg" || entry.path().extension() == ".jpeg" ||
                 entry.path().extension() == ".png" || entry.path().extension() == ".ppm" ||
                 entry.path().extension() == ".pgm") {
-                cv::Mat img = load_image(filename, print);
-                if (!img.empty()) images.push_back(img);
-                if (images.size() >= static_cast<size_t>(amount)) break;
+                    cv::Mat img = load_image(filename, print);
+                    if (!img.empty()) images.push_back(img);
+                    if (images.size() >= static_cast<size_t>(amount)) break;
                 }
         }
         return images;

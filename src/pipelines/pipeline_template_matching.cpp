@@ -10,6 +10,7 @@ namespace template_pipeline {
         std::vector<BoundingBox> template_matching_bounding_boxes;
         std::vector<BoundingBox> bounding_boxes;
         for (size_t i = 0; i < shape_images.size(); i++) {
+            std::cout << "Image #" << i << " " << shape_images[i].cols << "x" << shape_images[i].rows <<std::endl;
             std::vector<std::vector<cv::Point>> contours;
             const cv::Mat& image = shape_images[i];
             int height = image.rows;
@@ -25,6 +26,7 @@ namespace template_pipeline {
             cv::cvtColor(image, gray_image, cv::COLOR_BGR2GRAY);
 
             for (const auto& [sign, template_group] : templates) {
+                std::cout << sign << std::endl;
                 for (const auto& template_img : template_group){
                     for (int angle : rotation_angles) {
                         cv::Mat rotated_template = geo_ops::rotate_image_cv(template_img, angle);
@@ -49,7 +51,7 @@ namespace template_pipeline {
                               << " | Template Size: " << rotated_template.cols << "x" << rotated_template.rows
                               << std::endl;
 
-                        if(maxVal < 0.7) {
+                        if(maxVal < 0.45) {
                             continue;
                         }
 
@@ -63,10 +65,8 @@ namespace template_pipeline {
                         cv::imshow("Mask", mask);
                         cv::waitKey(0);*/
 
-
-
-                        int half_width = rotated_template.cols / 2;
-                        int half_height = rotated_template.rows / 2;
+                        int half_width = static_cast<int>(rotated_template.cols / 2);
+                        int half_height =static_cast<int>( rotated_template.rows / 2);
 
                         std::vector<cv::Point> box_contour = {
                             cv::Point(matchLoc.x - half_width, matchLoc.y - half_height),
@@ -75,9 +75,13 @@ namespace template_pipeline {
                             cv::Point(matchLoc.x - half_width, matchLoc.y + half_height)
                         };
                         BoundingBox* bbox = bounding_box::create_bounding_box(box_contour, i, min_box_area, max_box_area, box_color, sign);
-                        bounding_boxes.push_back(*bbox);
+                        if (bbox != nullptr) {
+                            bounding_boxes.push_back(*bbox);
+                            delete bbox;
+                        }
                     }
                 }
+                std::cout << std::endl;
             }
             template_matching_bounding_boxes.insert(template_matching_bounding_boxes.end(), bounding_boxes.begin(), bounding_boxes.end());
         }
