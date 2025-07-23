@@ -44,7 +44,7 @@ namespace colors {
 
     bool is_strong_red(float h, float s, float v) {
         bool is_hue_red = (h >= 340.0f || h <= 20.0f);
-        bool is_saturated = (s >= 0.3f);
+        bool is_saturated = (s >= 0.6f);
         bool is_bright_enough = (v >= 0.1f);
         return is_hue_red && is_saturated && is_bright_enough;
     }

@@ -48,6 +48,7 @@ namespace pipeline_preprocessing {
             std::vector<cv::Mat> preprocessed_template_group;
             for (const auto& template_: template_group) {
                 cv::Mat preprocessed_template;
+                //cv::medianBlur(template_, preprocessed_template, 3);
                 cv::cvtColor(template_, preprocessed_template, cv::COLOR_BGR2GRAY);
                 preprocessed_template_group.push_back(preprocessed_template);
             }
@@ -59,11 +60,11 @@ namespace pipeline_preprocessing {
 
     std::unordered_map<std::string, std::vector<cv::Mat>> start_preprocessing_pipeline() {
         std::vector<std::string> folders = {
-            "../traffic_sign_images/vf",
+            /*"../traffic_sign_images/vf",
             "../traffic_sign_images/vfa",
             "../traffic_sign_images/vfs",
-            "../traffic_sign_images/stop"
-
+            "../traffic_sign_images/stop"*/
+            "../traffic_sign_images/debug"
         };
 
         std::vector<cv::Mat> stop_templates = basic_ops::load_images("../traffic_sign_templates/stop_signs/resized", 4, true);

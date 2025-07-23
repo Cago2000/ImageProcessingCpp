@@ -26,7 +26,11 @@ namespace color_pipeline {
                 const std::vector<std::vector<cv::Point>>& blobs = cd::get_blobs(mask);
                 cv::Vec3b box_color = colors::get_color_from_function(color_function);
                 std::vector<BoundingBox> bounding_boxes = bounding_box::create_bounding_boxes(blobs, i, min_box_area, max_box_area, box_color, "");
-                for(auto bounding_box: bounding_boxes) {
+
+                //cv::imshow("Mask", mask);
+                //cv::waitKey(0);
+
+                for(const auto& bounding_box: bounding_boxes) {
                     color_bounding_boxes.push_back(bounding_box);
                 }
             }

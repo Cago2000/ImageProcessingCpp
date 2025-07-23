@@ -199,7 +199,7 @@ namespace bounding_box {
             int image_index = similar_boxes[0]->image_index;
 
             std::string box_sign;
-            for (const auto& bbox: similar_boxes) {
+            for (const auto* bbox: similar_boxes) {
                 if (!bbox->box_sign.empty()) {
                     box_sign = bbox->box_sign;
                     break;

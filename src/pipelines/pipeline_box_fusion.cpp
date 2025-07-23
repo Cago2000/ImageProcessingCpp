@@ -13,10 +13,10 @@ namespace box_fusion_pipeline {
         std::vector<BoundingBox> template_bounding_boxes = bounding_boxes["template"];
 
         std::vector<BoundingBox> fused_bounding_boxes = bounding_box::fuse_bounding_box_matches(
-            color_bounding_boxes, shape_bounding_boxes, 20
+            color_bounding_boxes, shape_bounding_boxes, 10
         );
 
-        fused_bounding_boxes = bounding_box::fuse_bounding_box_matches(fused_bounding_boxes, template_bounding_boxes, 20);
+        fused_bounding_boxes = bounding_box::fuse_bounding_box_matches(fused_bounding_boxes, template_bounding_boxes, 10);
 
         fused_bounding_boxes = bounding_box::merge_duplicate_boxes(fused_bounding_boxes, 10);
 

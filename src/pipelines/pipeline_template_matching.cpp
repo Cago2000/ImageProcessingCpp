@@ -20,7 +20,7 @@ namespace template_pipeline {
             int min_box_area = static_cast<int>(pow(height * 0.055, 2));
             int max_box_area = height * width;
 
-            std::vector<int> rotation_angles = {-5, -3, 0, 3, 5};
+            std::vector<int> rotation_angles = {-5, 0, 5};
 
             cv::Mat gray_image;
             cv::cvtColor(image, gray_image, cv::COLOR_BGR2GRAY);
@@ -31,7 +31,14 @@ namespace template_pipeline {
                     for (int angle : rotation_angles) {
                         cv::Mat rotated_template = geo_ops::rotate_image_cv(template_img, angle);
                         cv::Mat mask;
-                        cv::threshold(rotated_template, mask, 250, 255, cv::THRESH_BINARY_INV);
+                        cv::threshold(rotated_template, mask, 230, 255, cv::THRESH_BINARY_INV);
+
+                        std::vector<std::vector<cv::Point>> point;
+                        cv::findContours(mask, point, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+                        mask = cv::Mat::zeros(mask.size(), CV_8UC1);
+                        cv::fillPoly(mask, point, cv::Scalar(255));
+
+                        cv::Mat mask_copy = mask.clone();
 
                         int result_cols = gray_image.cols - rotated_template.cols + 1;
                         int result_rows = gray_image.rows - rotated_template.rows + 1;
@@ -51,19 +58,19 @@ namespace template_pipeline {
                               << " | Template Size: " << rotated_template.cols << "x" << rotated_template.rows
                               << std::endl;
 
-                        if(maxVal < 0.45) {
-                            continue;
-                        }
-
                         cv::Mat display;
                         cv::cvtColor(gray_image, display, cv::COLOR_GRAY2BGR);
                         cv::rectangle(display, matchLoc, cv::Point(matchLoc.x + template_img.cols, matchLoc.y + template_img.rows), cv::Scalar(0, 255, 0), 2);
 
-                        /*cv::imshow("Match Result", result);
+                        if(maxVal < 0.45 || maxVal > 1.0) {
+                            continue;
+                        }
+
+                        cv::imshow("Match Result", result);
                         cv::imshow("Detected Match", display);
                         cv::imshow("Template", rotated_template);
-                        cv::imshow("Mask", mask);
-                        cv::waitKey(0);*/
+                        cv::imshow("Mask", mask_copy);
+                        cv::waitKey(0);
 
                         int half_width = static_cast<int>(rotated_template.cols / 2);
                         int half_height =static_cast<int>( rotated_template.rows / 2);
