@@ -83,7 +83,10 @@ namespace template_pipeline {
                             cv::Point(matchLoc.x + half_width, matchLoc.y + half_height),
                             cv::Point(matchLoc.x - half_width, matchLoc.y + half_height)
                         };
-                        BoundingBox* bbox = bounding_box::create_bounding_box(box_contour, i, min_box_area, max_box_area, box_color, sign);
+
+                        double area = cv::contourArea(box_contour);
+                        if (area < min_box_area || area > max_box_area){continue;}
+                        BoundingBox* bbox = bounding_box::create_bounding_box(box_contour, i, box_color, 1.75 ,"", sign);
                         if (bbox != nullptr) {
                             bounding_boxes.push_back(*bbox);
                             delete bbox;

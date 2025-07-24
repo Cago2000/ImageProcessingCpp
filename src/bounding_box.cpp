@@ -8,8 +8,7 @@
 #include <memory_resource>
 
 namespace bounding_box {
-    BoundingBox *create_bounding_box(const std::vector<cv::Point> &contour, int image_index, int min_box_area,
-                                     int max_box_area, cv::Vec3b &box_color, std::string sign) {
+    BoundingBox *create_bounding_box(const std::vector<cv::Point> &contour, int image_index, const cv::Vec3b &box_color, double max_aspect_ratio, const std::string &shape, std::string sign) {
         if (contour.empty()) return nullptr;
 
         int left = std::numeric_limits<int>::max();
@@ -24,41 +23,12 @@ namespace bounding_box {
             bottom = std::max(bottom, pt.y);
         }
 
-        std::vector<cv::Point> approx;
-        cv::approxPolyDP(contour, approx, 0.05 * cv::arcLength(contour, true), true);
-        std::string shape;
-
-        const size_t vertices = approx.size();
-
-        switch (vertices) {
-            case 3:
-                shape = "Triangle " + std::to_string(vertices);
-                break;
-            case 4: {
-                cv::Rect rect = cv::boundingRect(approx);
-                float aspectRatio = (float)rect.width / rect.height;
-                if (aspectRatio > 0.95 && aspectRatio < 1.05)
-                    shape = "Square or Diamond " + std::to_string(vertices);
-                else
-                    shape = "Rectangle " + std::to_string(vertices);
-                break;
-            }
-            case 8:
-                shape = "Octagon " + std::to_string(vertices);
-                break;
-            default:
-                shape = "Unidentified shape " + std::to_string(vertices);
-                break;
-        }
-
         int width = right - left + 1;
         int height = bottom - top + 1;
         int area = width * height;
 
-        if (area < min_box_area || area > max_box_area) return nullptr;
-
         double aspect_ratio = std::max(static_cast<double>(width)/height, static_cast<double>(height)/width);
-        if (aspect_ratio > 1.75) return nullptr;
+        if (aspect_ratio > max_aspect_ratio) return nullptr;
 
         int center_y = (top + bottom) / 2;
         int center_x = (left + right) / 2;
@@ -69,16 +39,17 @@ namespace bounding_box {
                   << ", Detected shape: " << shape
                   << " with " << vertices << " simplified vertices at "
                   << "(" << center_y << ", " << center_x << ")" << std::endl;*/
-        BoundingBox* bbox = new BoundingBox(center_y, center_x, box_corners, height, width, area, box_color, shape, std::move(sign), image_index);
+
+        auto* bbox = new BoundingBox(center_y, center_x, box_corners, height, width, area, box_color, shape, std::move(sign), image_index);
         return bbox;
     }
 
     std::vector<BoundingBox> create_bounding_boxes(const std::vector<std::vector<cv::Point>>& contours,
-                                               int image_index, int min_box_area, int max_box_area,
+                                               int image_index, std::string shape,
                                                cv::Vec3b& box_color, std::string sign) {
         std::vector<BoundingBox> bounding_boxes;
         for (const auto& contour : contours) {
-            BoundingBox* bbox = create_bounding_box(contour, image_index, min_box_area, max_box_area, box_color, sign);
+            BoundingBox* bbox = create_bounding_box(contour, image_index, box_color, 1.75, shape,sign);
             if (bbox != nullptr) {
                 bounding_boxes.push_back(*bbox);
                 delete bbox;

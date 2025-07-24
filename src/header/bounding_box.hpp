@@ -44,11 +44,11 @@ public:
 };
 
 namespace bounding_box {
-    BoundingBox *create_bounding_box(const std::vector<cv::Point> &contour, int image_index,
-                                     int min_box_area, int max_box_area, cv::Vec3b &box_color, std::string sign);
+    BoundingBox *create_bounding_box(const std::vector<cv::Point> &contour, int image_index, const cv::Vec3b &box_color,
+                                     double max_aspect_ratio, const std::string &shape, std::string sign);
 
     std::vector<BoundingBox> create_bounding_boxes(const std::vector<std::vector<cv::Point>>& contours, int image_index,
-                                                   int min_box_area, int max_box_area, cv::Vec3b& box_color, std::string sign);
+                                                    cv::Vec3b& box_color, std::string sign);
 
     cv::Mat draw_bounding_box(const BoundingBox& bounding_box, cv::Mat& image, const cv::Vec3b& color);
 

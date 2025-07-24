@@ -20,24 +20,44 @@ namespace shape_pipeline {
             int min_box_area = 500;//static_cast<int>(pow(height * 0.0275, 2));
             int max_box_area = height * width;
 
-            std::vector<std::vector<cv::Point>> filtered_contours;
             for (const auto& contour : contours) {
                 double area = contourArea(contour);
-                if (area >= min_box_area && area <= max_box_area) {
-                    filtered_contours.push_back(contour);
+                if (area < min_box_area || area > max_box_area){continue;}
+
+                std::vector<cv::Point> approx;
+                cv::approxPolyDP(contour, approx, 0.05 * cv::arcLength(contour, true), true);
+                std::string shape;
+
+                const size_t vertices = approx.size();
+
+                switch (vertices) {
+                    case 3:
+                        shape = "Triangle " + std::to_string(vertices);
+                        break;
+                    case 4: {
+                        cv::Rect rect = cv::boundingRect(approx);
+                        float aspectRatio = (float)rect.width / rect.height;
+                        if (aspectRatio > 0.95 && aspectRatio < 1.05)
+                            shape = "Square or Diamond " + std::to_string(vertices);
+                        else
+                            shape = "Rectangle " + std::to_string(vertices);
+                        break;
+                    }
+                    case 8:
+                        shape = "Octagon " + std::to_string(vertices);
+                        break;
+                    default:
+                        shape = "Unidentified shape " + std::to_string(vertices);
+                        break;
                 }
+
+                BoundingBox* bounding_box = bounding_box::create_bounding_box(contour, i, box_color, 1.75, shape, "");
+                if (bounding_box != nullptr) {
+                    shape_bounding_boxes.push_back(*bounding_box);
+                    delete bounding_box;
+                }
+
             }
-
-            std::vector<BoundingBox> bounding_boxes = bounding_box::create_bounding_boxes(
-                filtered_contours, i, min_box_area, max_box_area, box_color, ""
-            );
-
-            shape_bounding_boxes.insert(
-                shape_bounding_boxes.end(),
-                bounding_boxes.begin(),
-                bounding_boxes.end()
-            );
-
             //debug
             /*cv::Mat image_copy = image.clone();
             cv::cvtColor(image_copy, image_copy, cv::COLOR_GRAY2BGR);

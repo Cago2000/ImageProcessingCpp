@@ -25,14 +25,28 @@ namespace color_pipeline {
                 cv::Mat mask = colors::get_mask(image, color_function);
                 const std::vector<std::vector<cv::Point>>& blobs = cd::get_blobs(mask);
                 cv::Vec3b box_color = colors::get_color_from_function(color_function);
-                std::vector<BoundingBox> bounding_boxes = bounding_box::create_bounding_boxes(blobs, i, min_box_area, max_box_area, box_color, "");
-
+                for (const auto& blob : blobs) {
+                    int left = std::numeric_limits<int>::max();
+                    int right = std::numeric_limits<int>::min();
+                    int top = std::numeric_limits<int>::max();
+                    int bottom = std::numeric_limits<int>::min();
+                    for (const auto& pt : blob) {
+                        left = std::min(left, pt.x);
+                        right = std::max(right, pt.x);
+                        top = std::min(top, pt.y);
+                        bottom = std::max(bottom, pt.y);
+                    }
+                    const int blob_width = right - left + 1;
+                    const int blob_height = bottom - top + 1;
+                    int area = blob_width * blob_height;
+                    if (area < min_box_area || area > max_box_area){continue;}
+                    BoundingBox* bounding_box = bounding_box::create_bounding_box(blob, i, box_color, 1.75, "", "");
+                    if (bounding_box != nullptr) {
+                        color_bounding_boxes.push_back(*bounding_box);
+                    }
+                }
                 //cv::imshow("Mask", mask);
                 //cv::waitKey(0);
-
-                for(const auto& bounding_box: bounding_boxes) {
-                    color_bounding_boxes.push_back(bounding_box);
-                }
             }
         }
         color_bounding_boxes = bounding_box::merge_duplicate_boxes(color_bounding_boxes, 10);
