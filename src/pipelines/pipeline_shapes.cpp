@@ -6,9 +6,7 @@
 
 namespace shape_pipeline {
     std::vector<BoundingBox> start_pipeline_shapes(std::vector<cv::Mat> shape_images) {
-
         std::vector<BoundingBox> shape_bounding_boxes;
-
         for (size_t i = 0; i < shape_images.size(); i++) {
             const cv::Mat& image = shape_images[i];
             std::vector<std::vector<cv::Point>> contours;
@@ -25,7 +23,7 @@ namespace shape_pipeline {
                 if (area < min_box_area || area > max_box_area){continue;}
 
                 std::vector<cv::Point> approx;
-                cv::approxPolyDP(contour, approx, 0.05 * cv::arcLength(contour, true), true);
+                cv::approxPolyDP(contour, approx, 0.02 * cv::arcLength(contour, false), true);
                 std::string shape;
 
                 const size_t vertices = approx.size();
@@ -47,8 +45,7 @@ namespace shape_pipeline {
                         shape = "Octagon " + std::to_string(vertices);
                         break;
                     default:
-                        shape = "Unidentified shape " + std::to_string(vertices);
-                        break;
+                        continue;
                 }
 
                 BoundingBox* bounding_box = bounding_box::create_bounding_box(contour, i, box_color, 1.75, shape, "");
@@ -61,13 +58,13 @@ namespace shape_pipeline {
             //debug
             /*cv::Mat image_copy = image.clone();
             cv::cvtColor(image_copy, image_copy, cv::COLOR_GRAY2BGR);
-            for (const BoundingBox& bounding_box : bounding_boxes) {
+            for (const BoundingBox& bounding_box : shape_bounding_boxes) {
                 bounding_box::draw_bounding_box(bounding_box, image_copy, {0, 255, 0});
             }
             basic_ops::show_image(image_copy, "Image " + std::to_string(i));*/
         }
 
-        shape_bounding_boxes = bounding_box::merge_duplicate_boxes(shape_bounding_boxes, 10);
+        shape_bounding_boxes = bounding_box::merge_duplicate_boxes(shape_bounding_boxes, 20);
 
         std::cout << "Shape Bounding Boxes: " << shape_bounding_boxes.size() << std::endl;
         for (auto& bbox : shape_bounding_boxes) {

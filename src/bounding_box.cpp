@@ -77,112 +77,135 @@ namespace bounding_box {
         return image;
     }
 
-    std::vector<BoundingBox> fuse_bounding_box_matches(const std::vector<BoundingBox>& boxes1, const std::vector<BoundingBox>& boxes2, int max_deviation) {
-        std::vector<BoundingBox> new_boxes;
+ std::vector<BoundingBox> fuse_bounding_box_matches(const std::vector<BoundingBox>& boxes1, const std::vector<BoundingBox>& boxes2, int max_deviation) {
+    std::vector<BoundingBox> new_boxes;
 
-        for (const auto& box1 : boxes1) {
-            for (const auto& box2 : boxes2) {
-                if (std::abs(box1.center_y - box2.center_y) >= max_deviation || std::abs(box1.center_x - box2.center_x) >= max_deviation) {
-                    continue;
+    for (const auto& box1 : boxes1) {
+        for (const auto& box2 : boxes2) {
+            if (std::abs(box1.center_y - box2.center_y) >= max_deviation || std::abs(box1.center_x - box2.center_x) >= max_deviation) {
+                continue;
+            }
+
+            std::vector<int> new_corners(4);
+            for (int i = 0; i < 4; ++i) {
+                new_corners[i] = (box1.box_corners[i] + box2.box_corners[i]) / 2;
+            }
+
+            int new_center_y = (box1.center_y + box2.center_y) / 2;
+            int new_center_x = (box1.center_x + box2.center_x) / 2;
+            int new_height = (box1.box_height + box2.box_height) / 2;
+            int new_width = (box1.box_width + box2.box_width) / 2;
+            int new_area = new_height * new_width;
+
+            cv::Vec3b new_color = {255, 255, 255};
+            if (box1.box_color != cv::Vec3b(255, 255, 255)) new_color = box1.box_color;
+            if (box2.box_color != cv::Vec3b(255, 255, 255)) new_color = box2.box_color;
+
+            std::string new_shape;
+            if (!box1.box_shape.empty() && !box2.box_shape.empty()) {
+                if (box1.box_shape == box2.box_shape) {
+                    new_shape = box1.box_shape;
+                } else {
+                    new_shape = box1.box_shape;
                 }
+            } else if (!box1.box_shape.empty()) {
+                new_shape = box1.box_shape;
+            } else {
+                new_shape = box2.box_shape;
+            }
+            int new_image_index = box1.image_index;
+            std::string new_box_sign = box1.box_sign;
+            if (box1.box_sign.empty()) {
+                new_box_sign = box2.box_sign;
+            }
+            new_boxes.emplace_back(new_center_y, new_center_x, new_corners, new_height, new_width, new_area, new_color, new_shape, new_box_sign, new_image_index);
+        }
+    }
+    return new_boxes;
+}
 
-                std::vector<int> new_corners(4);
-                for (int i = 0; i < 4; ++i) {
-                    new_corners[i] = (box1.box_corners[i] + box2.box_corners[i]) / 2;
-                }
 
-                int new_center_y = (box1.center_y + box2.center_y) / 2;
-                int new_center_x = (box1.center_x + box2.center_x) / 2;
-                int new_height = (box1.box_height + box2.box_height) / 2;
-                int new_width = (box1.box_width + box2.box_width) / 2;
-                int new_area = new_height * new_width;
+std::vector<BoundingBox> merge_duplicate_boxes(const std::vector<BoundingBox>& boxes, int max_deviation) {
+    std::vector<BoundingBox> merged_boxes;
+    std::vector<bool> visited(boxes.size(), false);
 
-                cv::Vec3b new_color = {255, 255, 255};
-                if (box1.box_color != cv::Vec3b(255, 255, 255)) new_color = box1.box_color;
-                if (box2.box_color != cv::Vec3b(255, 255, 255)) new_color = box2.box_color;
+    for (size_t i = 0; i < boxes.size(); ++i) {
+        if (visited[i]) continue;
 
-                std::string new_shape = box1.box_shape;
-                int new_image_index = box1.image_index;
+        std::vector similar_boxes = {&boxes[i]};
+        visited[i] = true;
 
-                std::string new_box_sign = box1.box_sign;
-                if (box1.box_sign.empty()) {
-                    new_box_sign = box2.box_sign;
-                }
+        for (size_t j = i + 1; j < boxes.size(); ++j) {
+            if (visited[j]) continue;
 
-                new_boxes.emplace_back(new_center_y, new_center_x, new_corners, new_height, new_width, new_area, new_color, new_shape, new_box_sign, new_image_index);
+            if (boxes[i].image_index == boxes[j].image_index &&
+                std::abs(boxes[i].center_y - boxes[j].center_y) <= max_deviation &&
+                std::abs(boxes[i].center_x - boxes[j].center_x) <= max_deviation) {
+                similar_boxes.push_back(&boxes[j]);
+                visited[j] = true;
             }
         }
 
-        return new_boxes;
-    }
-
-    std::vector<BoundingBox> merge_duplicate_boxes(const std::vector<BoundingBox>& boxes, int max_deviation) {
-        std::vector<BoundingBox> merged_boxes;
-        std::vector<bool> visited(boxes.size(), false);
-
-        for (size_t i = 0; i < boxes.size(); ++i) {
-            if (visited[i]) continue;
-
-            std::vector<const BoundingBox*> similar_boxes = {&boxes[i]};
-            visited[i] = true;
-
-            for (size_t j = i + 1; j < boxes.size(); ++j) {
-                if (visited[j]) continue;
-
-                if (boxes[i].image_index == boxes[j].image_index &&
-                    std::abs(boxes[i].center_y - boxes[j].center_y) <= max_deviation &&
-                    std::abs(boxes[i].center_x - boxes[j].center_x) <= max_deviation) {
-                    similar_boxes.push_back(&boxes[j]);
-                    visited[j] = true;
-                }
-            }
-
-            std::vector<int> avg_corners(4, 0);
-            for (int c = 0; c < 4; ++c) {
-                int sum = 0;
-                for (const auto* b : similar_boxes) {
-                    sum += b->box_corners[c];
-                }
-                avg_corners[c] = sum / static_cast<int>(similar_boxes.size());
-            }
-
-            int avg_center_y = std::accumulate(similar_boxes.begin(), similar_boxes.end(), 0,
-                [](int sum, const BoundingBox* b) { return sum + b->center_y; }) / similar_boxes.size();
-
-            int avg_center_x = std::accumulate(similar_boxes.begin(), similar_boxes.end(), 0,
-                [](int sum, const BoundingBox* b) { return sum + b->center_x; }) / similar_boxes.size();
-
-            int avg_height = std::accumulate(similar_boxes.begin(), similar_boxes.end(), 0,
-                [](int sum, const BoundingBox* b) { return sum + b->box_height; }) / similar_boxes.size();
-
-            int avg_width = std::accumulate(similar_boxes.begin(), similar_boxes.end(), 0,
-                [](int sum, const BoundingBox* b) { return sum + b->box_width; }) / similar_boxes.size();
-
-            int avg_area = avg_height * avg_width;
-
-            cv::Vec3b avg_color = {255, 255, 255};
+        std::vector<int> avg_corners(4, 0);
+        for (int c = 0; c < 4; ++c) {
+            int sum = 0;
             for (const auto* b : similar_boxes) {
-                if (b->box_color != cv::Vec3b(255, 255, 255)) {
-                    avg_color = b->box_color;
-                    break;
-                }
+                sum += b->box_corners[c];
             }
-            std::string avg_shape = boxes[i].box_shape;
-
-            int image_index = similar_boxes[0]->image_index;
-
-            std::string box_sign;
-            for (const auto* bbox: similar_boxes) {
-                if (!bbox->box_sign.empty()) {
-                    box_sign = bbox->box_sign;
-                    break;
-                }
-            }
-            merged_boxes.emplace_back(avg_center_y, avg_center_x, avg_corners, avg_height, avg_width, avg_area, avg_color, avg_shape, box_sign, image_index);
+            avg_corners[c] = sum / static_cast<int>(similar_boxes.size());
         }
 
-        return merged_boxes;
+        int avg_center_y = std::accumulate(similar_boxes.begin(), similar_boxes.end(), 0,
+            [](int sum, const BoundingBox* b) { return sum + b->center_y; }) / similar_boxes.size();
+
+        int avg_center_x = std::accumulate(similar_boxes.begin(), similar_boxes.end(), 0,
+            [](int sum, const BoundingBox* b) { return sum + b->center_x; }) / similar_boxes.size();
+
+        int avg_height = std::accumulate(similar_boxes.begin(), similar_boxes.end(), 0,
+            [](int sum, const BoundingBox* b) { return sum + b->box_height; }) / similar_boxes.size();
+
+        int avg_width = std::accumulate(similar_boxes.begin(), similar_boxes.end(), 0,
+            [](int sum, const BoundingBox* b) { return sum + b->box_width; }) / similar_boxes.size();
+
+        int avg_area = avg_height * avg_width;
+
+        cv::Vec3b avg_color = {255, 255, 255};
+        for (const auto* b : similar_boxes) {
+            if (b->box_color != cv::Vec3b(255, 255, 255)) {
+                avg_color = b->box_color;
+                break;
+            }
+        }
+
+        std::unordered_map<std::string, int> shape_counts;
+        for (const auto* b : similar_boxes) {
+            shape_counts[b->box_shape]++;
+        }
+        std::string avg_shape;
+        int max_count = 0;
+        for (const auto& pair : shape_counts) {
+            if (pair.second > max_count) {
+                max_count = pair.second;
+                avg_shape = pair.first;
+            }
+        }
+
+        int image_index = similar_boxes[0]->image_index;
+
+        std::string box_sign;
+        for (const auto* bbox: similar_boxes) {
+            if (!bbox->box_sign.empty()) {
+                box_sign = bbox->box_sign;
+                break;
+            }
+        }
+
+        merged_boxes.emplace_back(avg_center_y, avg_center_x, avg_corners, avg_height, avg_width, avg_area, avg_color, avg_shape, box_sign, image_index);
     }
+
+    return merged_boxes;
+}
+
 
 
     std::vector<cv::Mat> get_roi(const std::vector<cv::Mat>& images, const std::vector<BoundingBox>& bounding_boxes, int min_area, int margin) {
