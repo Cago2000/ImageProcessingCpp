@@ -8,7 +8,7 @@
 #include <memory_resource>
 
 namespace bounding_box {
-    BoundingBox *create_bounding_box(const std::vector<cv::Point> &contour, int image_index, const cv::Vec3b &box_color, double max_aspect_ratio, const std::string &shape, std::string sign) {
+    BoundingBox *create_bounding_box(const std::vector<cv::Point> &contour, int image_index, const cv::Vec3b &box_color, const std::string &shape, std::string sign) {
         if (contour.empty()) return nullptr;
 
         int left = std::numeric_limits<int>::max();
@@ -26,9 +26,6 @@ namespace bounding_box {
         int width = right - left + 1;
         int height = bottom - top + 1;
         int area = width * height;
-
-        double aspect_ratio = std::max(static_cast<double>(width)/height, static_cast<double>(height)/width);
-        if (aspect_ratio > max_aspect_ratio) return nullptr;
 
         int center_y = (top + bottom) / 2;
         int center_x = (left + right) / 2;
@@ -49,7 +46,7 @@ namespace bounding_box {
                                                cv::Vec3b& box_color, std::string sign) {
         std::vector<BoundingBox> bounding_boxes;
         for (const auto& contour : contours) {
-            BoundingBox* bbox = create_bounding_box(contour, image_index, box_color, 1.75, shape,sign);
+            BoundingBox* bbox = create_bounding_box(contour, image_index, box_color,  shape,sign);
             if (bbox != nullptr) {
                 bounding_boxes.push_back(*bbox);
                 delete bbox;

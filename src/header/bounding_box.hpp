@@ -45,7 +45,7 @@ public:
 
 namespace bounding_box {
     BoundingBox *create_bounding_box(const std::vector<cv::Point> &contour, int image_index, const cv::Vec3b &box_color,
-                                     double max_aspect_ratio, const std::string &shape, std::string sign);
+                                     const std::string &shape, std::string sign);
 
     std::vector<BoundingBox> create_bounding_boxes(const std::vector<std::vector<cv::Point>>& contours, int image_index,
                                                     cv::Vec3b& box_color, std::string sign);

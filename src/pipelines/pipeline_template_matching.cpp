@@ -10,7 +10,6 @@ namespace template_pipeline {
         std::vector<BoundingBox> template_matching_bounding_boxes;
         std::vector<BoundingBox> bounding_boxes;
         for (size_t i = 0; i < images.size(); i++) {
-            std::cout << "Image #" << i << " " << images[i].cols << "x" << images[i].rows <<std::endl;
             std::vector<std::vector<cv::Point>> contours;
             const cv::Mat& image = images[i];
             int height = image.rows;
@@ -20,7 +19,7 @@ namespace template_pipeline {
             int min_box_area = static_cast<int>(pow(height * 0.055, 2));
             int max_box_area = height * width;
 
-            std::vector<int> rotation_angles = {-5, 0, 5};
+            std::vector<int> rotation_angles = {-5, -3, 0, 3, 5};
 
             cv::Mat gray_image;
             cv::cvtColor(image, gray_image, cv::COLOR_BGR2GRAY);
@@ -63,7 +62,7 @@ namespace template_pipeline {
                         cv::cvtColor(gray_image, display, cv::COLOR_GRAY2BGR);
                         cv::rectangle(display, matchLoc, cv::Point(matchLoc.x + template_img.cols, matchLoc.y + template_img.rows), cv::Scalar(0, 255, 0), 2);
 
-                        if(maxVal < 0.25 || maxVal > 1.0) {
+                        if(maxVal < 0.5 || maxVal > 1.0) {
                             continue;
                         }
 
@@ -86,7 +85,7 @@ namespace template_pipeline {
 
                         double area = cv::contourArea(box_contour);
                         if (area < min_box_area || area > max_box_area){continue;}
-                        BoundingBox* bbox = bounding_box::create_bounding_box(box_contour, i, box_color, 1.75 ,"", sign);
+                        BoundingBox* bbox = bounding_box::create_bounding_box(box_contour, i, box_color, "", sign);
                         if (bbox != nullptr) {
                             bounding_boxes.push_back(*bbox);
                             delete bbox;

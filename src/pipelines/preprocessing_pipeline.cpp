@@ -60,11 +60,11 @@ namespace pipeline_preprocessing {
 
     std::unordered_map<std::string, std::vector<cv::Mat>> start_preprocessing_pipeline() {
         std::vector<std::string> folders = {
-            /*"../traffic_sign_images/vf",
+            "../traffic_sign_images/vf",
             "../traffic_sign_images/vfa",
             "../traffic_sign_images/vfs",
-            "../traffic_sign_images/stop"*/
-            "../traffic_sign_images/debug"
+            "../traffic_sign_images/stop"
+            //"../traffic_sign_images/debug"
         };
 
         std::vector<cv::Mat> stop_templates = basic_ops::load_images("../traffic_sign_templates/stop_signs/resized", 4, true);

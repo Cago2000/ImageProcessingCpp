@@ -19,7 +19,7 @@ namespace color_pipeline {
             const cv::Mat& image = color_images[i];
             int height = image.size().height;
             int width = image.size().width;
-            int min_box_area = static_cast<int>(pow(height * 0.0275, 2));
+            int min_box_area = 1000;
             int max_box_area = height * width;
             for (auto color_function : color_functions) {
                 cv::Mat mask = colors::get_mask(image, color_function);
@@ -40,13 +40,14 @@ namespace color_pipeline {
                     const int blob_height = bottom - top + 1;
                     int area = blob_width * blob_height;
                     if (area < min_box_area || area > max_box_area){continue;}
-                    BoundingBox* bounding_box = bounding_box::create_bounding_box(blob, i, box_color, 1.75, "", "");
+                    BoundingBox* bounding_box = bounding_box::create_bounding_box(blob, i, box_color, "", "");
                     if (bounding_box != nullptr) {
                         color_bounding_boxes.push_back(*bounding_box);
                     }
                 }
-                //cv::imshow("Mask", mask);
-                //cv::waitKey(0);
+                /*cv::imshow("Mask #" + std::to_string(i), mask);
+                cv::waitKey(0);
+                cv::destroyAllWindows();*/
             }
         }
         color_bounding_boxes = bounding_box::merge_duplicate_boxes(color_bounding_boxes, 10);
