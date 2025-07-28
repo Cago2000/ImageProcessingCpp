@@ -5,7 +5,7 @@
 #include "../header/basic_image_operations.hpp"
 
 namespace shape_pipeline {
-    std::vector<BoundingBox> start_pipeline_shapes(std::vector<cv::Mat> shape_images) {
+    std::vector<BoundingBox> start_pipeline_shapes(std::vector<cv::Mat> shape_images, bool debug_mode) {
         std::vector<double> epsilons = {0.03};
         std::vector<BoundingBox> shape_bounding_boxes;
         for (size_t i = 0; i < shape_images.size(); i++) {
@@ -26,7 +26,6 @@ namespace shape_pipeline {
                     std::vector<cv::Point> approx;
                     cv::approxPolyDP(contour, approx, epsilon * cv::arcLength(contour, true), true);
                     std::string shape;
-
                     const size_t vertices = approx.size();
                     switch (vertices) {
                         case 3:
@@ -56,14 +55,25 @@ namespace shape_pipeline {
             }
             //debug
             cv::Mat image_copy = image.clone();
-            std::vector<BoundingBox> bounding_boxes = shape_bounding_boxes;
-            cv::cvtColor(image_copy, image_copy, cv::COLOR_GRAY2BGR);
-            for (const BoundingBox& bounding_box : bounding_boxes) {
+            cv::Mat image_copy_with_boxes = image.clone();
+            cv::cvtColor(image_copy_with_boxes, image_copy_with_boxes, cv::COLOR_GRAY2BGR);
+            for (const BoundingBox& bounding_box : shape_bounding_boxes) {
+                if (!debug_mode) {break;}
                 if (bounding_box.image_index == i) {
-                    bounding_box::draw_bounding_box(bounding_box, image_copy, {0, 255, 0});
+                    if (bounding_box.box_shape == "Octagon") {
+                        bounding_box::draw_bounding_box(bounding_box, image_copy_with_boxes, {255, 0, 0});
+                    }
+                    else if (bounding_box.box_shape == "Triangle") {
+                        bounding_box::draw_bounding_box(bounding_box, image_copy_with_boxes, {0, 0, 255});
+                    }
+                    else if (bounding_box.box_shape == "Rectangle" || bounding_box.box_shape == "Square or Diamond") {
+                        bounding_box::draw_bounding_box(bounding_box, image_copy_with_boxes, {0, 255, 255});
+                    }
                 }
             }
-            basic_ops::show_image(image_copy, "Image " + std::to_string(i));
+            if (!debug_mode) {continue;}
+            cv::imshow("Image " + std::to_string(i), image_copy);
+            basic_ops::show_image(image_copy_with_boxes, "Image " + std::to_string(i)+ " with Boxes");
         }
 
         shape_bounding_boxes = bounding_box::merge_duplicate_boxes(shape_bounding_boxes, 20);

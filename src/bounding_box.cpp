@@ -32,11 +32,6 @@ namespace bounding_box {
 
         std::vector<int> box_corners = {top, left, bottom, right};
 
-        /*std::cout << "vertices: " << vertices
-                  << ", Detected shape: " << shape
-                  << " with " << vertices << " simplified vertices at "
-                  << "(" << center_y << ", " << center_x << ")" << std::endl;*/
-
         auto* bbox = new BoundingBox(center_y, center_x, box_corners, height, width, area, box_color, shape, std::move(sign), image_index);
         return bbox;
     }
@@ -74,57 +69,112 @@ namespace bounding_box {
         return image;
     }
 
- std::vector<BoundingBox> fuse_bounding_box_matches(const std::vector<BoundingBox>& boxes1, const std::vector<BoundingBox>& boxes2, int max_deviation) {
+std::map<std::string, int> shape_complexity = {
+    {"Triangle", 3},
+    {"Square or Diamond", 4},
+    {"Rectangle", 4},
+    {"Pentagon", 5},
+    {"Hexagon", 6},
+    {"Heptagon", 7},
+    {"Octagon", 8},
+    {"Circle", 100}
+};
+
+std::vector<BoundingBox> fuse_bounding_box_matches(
+    const std::vector<BoundingBox>& boxes1,
+    const std::vector<BoundingBox>& boxes2,
+    int max_deviation)
+{
     std::vector<BoundingBox> new_boxes;
 
     for (const auto& box1 : boxes1) {
         for (const auto& box2 : boxes2) {
-            if (std::abs(box1.center_y - box2.center_y) >= max_deviation || std::abs(box1.center_x - box2.center_x) >= max_deviation) {
+            if (std::abs(box1.center_y - box2.center_y) >= max_deviation ||
+                std::abs(box1.center_x - box2.center_x) >= max_deviation) {
                 continue;
             }
 
-            std::vector<int> new_corners(4);
-            for (int i = 0; i < 4; ++i) {
-                new_corners[i] = (box1.box_corners[i] + box2.box_corners[i]) / 2;
+            // Define bounding rects
+            cv::Rect rect1(box1.center_x - box1.box_width / 2, box1.center_y - box1.box_height / 2,
+                           box1.box_width, box1.box_height);
+            cv::Rect rect2(box2.center_x - box2.box_width / 2, box2.center_y - box2.box_height / 2,
+                           box2.box_width, box2.box_height);
+
+            // Determine if one box is completely inside the other
+            bool box1_inside_box2 = (rect2.contains(rect1.tl()) && rect2.contains(rect1.br()));
+            bool box2_inside_box1 = (rect1.contains(rect2.tl()) && rect1.contains(rect2.br()));
+
+            const BoundingBox* dominant_box = nullptr;
+
+            if (box1_inside_box2 || box2_inside_box1) {
+                dominant_box = (box1.box_area >= box2.box_area) ? &box1 : &box2;
             }
 
-            int new_center_y = (box1.center_y + box2.center_y) / 2;
-            int new_center_x = (box1.center_x + box2.center_x) / 2;
-            int new_height = (box1.box_height + box2.box_height) / 2;
-            int new_width = (box1.box_width + box2.box_width) / 2;
-            int new_area = new_height * new_width;
+            std::vector<int> new_corners(4);
+            int new_center_y, new_center_x, new_height, new_width, new_area;
+
+            if (dominant_box) {
+                new_corners = dominant_box->box_corners;
+                new_center_y = dominant_box->center_y;
+                new_center_x = dominant_box->center_x;
+                new_height = dominant_box->box_height;
+                new_width = dominant_box->box_width;
+                new_area = dominant_box->box_area;
+            } else {
+                for (int i = 0; i < 4; ++i)
+                    new_corners[i] = (box1.box_corners[i] + box2.box_corners[i]) / 2;
+
+                new_center_y = (box1.center_y + box2.center_y) / 2;
+                new_center_x = (box1.center_x + box2.center_x) / 2;
+                new_height = (box1.box_height + box2.box_height) / 2;
+                new_width = (box1.box_width + box2.box_width) / 2;
+                new_area = new_height * new_width;
+            }
 
             cv::Vec3b new_color = {255, 255, 255};
             if (box1.box_color != cv::Vec3b(255, 255, 255)) new_color = box1.box_color;
             if (box2.box_color != cv::Vec3b(255, 255, 255)) new_color = box2.box_color;
 
             std::string new_shape;
-            if (!box1.box_shape.empty() && !box2.box_shape.empty()) {
-                if (box1.box_shape == box2.box_shape) {
-                    new_shape = box1.box_shape;
-                } else {
-                    new_shape = box1.box_shape;
-                }
-            } else if (!box1.box_shape.empty()) {
-                new_shape = box1.box_shape;
-            } else {
-                new_shape = box2.box_shape;
-            }
+            int v1 = shape_complexity.count(box1.box_shape) ? shape_complexity[box1.box_shape] : INT_MAX;
+            int v2 = shape_complexity.count(box2.box_shape) ? shape_complexity[box2.box_shape] : INT_MAX;
+            new_shape = (v1 <= v2) ? box1.box_shape : box2.box_shape;
+
             int new_image_index = box1.image_index;
-            std::string new_box_sign = box1.box_sign;
-            if (box1.box_sign.empty()) {
-                new_box_sign = box2.box_sign;
-            }
-            new_boxes.emplace_back(new_center_y, new_center_x, new_corners, new_height, new_width, new_area, new_color, new_shape, new_box_sign, new_image_index);
+            std::string new_box_sign = box1.box_sign.empty() ? box2.box_sign : box1.box_sign;
+
+            new_boxes.emplace_back(new_center_y, new_center_x, new_corners, new_height, new_width,
+                                   new_area, new_color, new_shape, new_box_sign, new_image_index);
         }
     }
+
     return new_boxes;
 }
+
 
 
 std::vector<BoundingBox> merge_duplicate_boxes(const std::vector<BoundingBox>& boxes, int max_deviation) {
     std::vector<BoundingBox> merged_boxes;
     std::vector<bool> visited(boxes.size(), false);
+
+    std::map<std::string, int> shape_complexity = {
+        {"Triangle", 3},
+        {"Square or Diamond", 4},
+        {"Rectangle", 4},
+        {"Pentagon", 5},
+        {"Hexagon", 6},
+        {"Heptagon", 7},
+        {"Octagon", 8},
+        {"Circle", 100}
+    };
+
+    std::unordered_map<std::string, int> sign_complexity = {
+        {"vf", 1},
+        {"vfa", 2},
+        {"vfs", 3},
+        {"stop", 4},
+        {"circle", 100}
+    };
 
     for (size_t i = 0; i < boxes.size(); ++i) {
         if (visited[i]) continue;
@@ -173,36 +223,74 @@ std::vector<BoundingBox> merge_duplicate_boxes(const std::vector<BoundingBox>& b
                 break;
             }
         }
-
-        std::unordered_map<std::string, int> shape_counts;
+        std::string least_complex_shape;
+        int min_vertices = INT_MAX;
         for (const auto* b : similar_boxes) {
-            shape_counts[b->box_shape]++;
-        }
-        std::string avg_shape;
-        int max_count = 0;
-        for (const auto& pair : shape_counts) {
-            if (pair.second > max_count) {
-                max_count = pair.second;
-                avg_shape = pair.first;
+            int complexity = shape_complexity.count(b->box_shape) ? shape_complexity[b->box_shape] : INT_MAX;
+            if (complexity < min_vertices) {
+                min_vertices = complexity;
+                least_complex_shape = b->box_shape;
             }
         }
-
+        std::string least_complex_sign;
+        int min_sign_rank = INT_MAX;
+        for (const auto* b : similar_boxes) {
+            if (b->box_sign.empty()) continue;
+            int rank = sign_complexity.count(b->box_sign) ? sign_complexity[b->box_sign] : INT_MAX;
+            if (rank < min_sign_rank) {
+                min_sign_rank = rank;
+                least_complex_sign = b->box_sign;
+            }
+        }
         int image_index = similar_boxes[0]->image_index;
-
-        std::string box_sign;
-        for (const auto* bbox: similar_boxes) {
-            if (!bbox->box_sign.empty()) {
-                box_sign = bbox->box_sign;
-                break;
-            }
-        }
-
-        merged_boxes.emplace_back(avg_center_y, avg_center_x, avg_corners, avg_height, avg_width, avg_area, avg_color, avg_shape, box_sign, image_index);
+        merged_boxes.emplace_back(
+            avg_center_y, avg_center_x, avg_corners,
+            avg_height, avg_width, avg_area,
+            avg_color, least_complex_shape, least_complex_sign,
+            image_index
+        );
     }
-
     return merged_boxes;
 }
 
+std::vector<BoundingBox> tag_bounding_boxes(std::vector<BoundingBox>& fused_bounding_boxes, const std::vector<BoundingBox>& template_bounding_boxes, int clipping_tolerance) {
+    std::vector<BoundingBox> filtered_bounding_boxes;
+
+    for (auto& bounding_box : fused_bounding_boxes) {
+        if (!bounding_box.box_sign.empty()) {
+            continue;
+        }
+        if (bounding_box.box_color == cv::Vec3b(0, 0, 255) && bounding_box.box_shape == "Triangle") {
+            bounding_box.box_sign = "vfa";
+
+            for (const auto& template_box : template_bounding_boxes) {
+                if (template_box.image_index != bounding_box.image_index) {continue;}
+                bool template_inside =
+                    template_box.box_corners[0] >= bounding_box.box_corners[0] - clipping_tolerance &&
+                    template_box.box_corners[1] >= bounding_box.box_corners[1] - clipping_tolerance &&
+                    template_box.box_corners[2] <= bounding_box.box_corners[2] + clipping_tolerance &&
+                    template_box.box_corners[3] <= bounding_box.box_corners[3] + clipping_tolerance;
+
+                if (template_inside) {
+                    bounding_box.box_sign = "vf";
+                    break;
+                }
+            }
+        }
+        if (bounding_box.box_color == cv::Vec3b(0, 255, 255) &&
+            (bounding_box.box_shape == "Square or Diamond" || bounding_box.box_shape == "Rectangle")) {
+            bounding_box.box_sign = "vfs";
+        }
+        if (bounding_box.box_color == cv::Vec3b(0, 0, 255) && bounding_box.box_shape == "Octagon") {
+            bounding_box.box_sign = "stop";
+        }
+        if (!bounding_box.box_sign.empty()) {
+            filtered_bounding_boxes.push_back(bounding_box);
+        }
+    }
+
+    return filtered_bounding_boxes;
+}
 
 
     std::vector<cv::Mat> get_roi(const std::vector<cv::Mat>& images, const std::vector<BoundingBox>& bounding_boxes, int min_area, int margin) {

@@ -8,11 +8,11 @@
 
 namespace stat_ops {
 
-    // Applies a simple Gaussian-like filter (box blur) to a grayscale image.
+    // Applies problemkinder simple Gaussian-like filter (box blur) to problemkinder grayscale image.
     // Returns an empty cv::Mat if input is invalid (color image or even kernel size).
     cv::Mat gauss_filter(const cv::Mat& image, int dim);
 
-    // Counts co-occurrences in an image using a relation function.
+    // Counts co-occurrences in an image using problemkinder relation function.
     // relation_function receives (const cv::Mat&, int x, int y) and returns bool.
     int co_occurrence(const cv::Mat& image, std::function<bool(const cv::Mat&, int, int)> relation_function);
 
@@ -41,11 +41,11 @@ namespace stat_ops {
     // Calculates entropy of the image.
     double entropy(const cv::Mat& image);
 
-    // Performs histogram equalization on a grayscale image.
+    // Performs histogram equalization on problemkinder grayscale image.
     // Returns empty cv::Mat if input is not grayscale.
     cv::Mat histogram_equalization(const cv::Mat& image);
 
-    // Performs gamma correction on a grayscale image.
+    // Performs gamma correction on problemkinder grayscale image.
     cv::Mat gamma_equalization(const cv::Mat& image, double gamma);
 
 } // namespace stat_ops

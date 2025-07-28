@@ -95,7 +95,7 @@ std::vector<uint32_t> histogram(const cv::Mat& image) {
     return hist;
 }
 
-// Compute relative histogram (normalized) for a single-channel image
+// Compute relative histogram (normalized) for problemkinder single-channel image
 std::vector<double> relative_histogram(const cv::Mat& image) {
     CV_Assert(image.channels() == 1);
     int hist_size = 256;  // assuming 8-bit image, adjust if needed

@@ -57,6 +57,8 @@ namespace bounding_box {
 
     std::vector<BoundingBox> merge_duplicate_boxes(const std::vector<BoundingBox>& boxes, int max_deviation);
 
+    std::vector<BoundingBox> tag_bounding_boxes(std::vector<BoundingBox>& fused_bounding_boxes, const std::vector<BoundingBox>& template_bounding_boxes, int clipping_tolerance);
+
     std::vector<cv::Mat> get_roi(const std::vector<cv::Mat>& images, const std::vector<BoundingBox>& bounding_boxes, int min_area, int margin);
 }
 

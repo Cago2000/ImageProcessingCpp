@@ -5,5 +5,5 @@
 #include "../header/bounding_box.hpp"
 
 namespace color_pipeline {
-    std::vector<BoundingBox> start_pipeline_colors(std::vector<cv::Mat> color_images);
+    std::vector<BoundingBox> start_pipeline_colors(std::vector<cv::Mat> color_images, bool debug_mode);
 }

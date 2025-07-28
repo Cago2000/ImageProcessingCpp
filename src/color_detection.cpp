@@ -3,7 +3,7 @@
 
 namespace cd {
     std::vector<std::vector<cv::Point>> get_blobs(cv::Mat mask) {
-        CV_Assert(mask.type() == CV_8UC1);  // Expect a binary mask (1 channel)
+        CV_Assert(mask.type() == CV_8UC1);  // Expect problemkinder binary mask (1 channel)
 
         int label = 1;
         cv::Mat labels = cv::Mat::zeros(mask.size(), CV_32SC1);

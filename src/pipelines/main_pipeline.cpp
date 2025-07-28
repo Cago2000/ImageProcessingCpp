@@ -10,7 +10,15 @@
 
 int main() {
 
-    std::unordered_map<std::string, std::vector<cv::Mat>> images = pipeline_preprocessing::start_preprocessing_pipeline();
+    std::vector<std::string> folders = {
+        //"../traffic_sign_images/vf",
+        //"../traffic_sign_images/vfa",
+        //"../traffic_sign_images/vfs",
+        //"../traffic_sign_images/stop"
+        "../traffic_sign_images/debug"
+    };
+
+    std::unordered_map<std::string, std::vector<cv::Mat>> images = pipeline_preprocessing::start_preprocessing_pipeline(folders);
     std::vector<cv::Mat> resized_images = images["resized"];
     std::vector<cv::Mat> color_images = images["color"];
     std::vector<cv::Mat> shape_images = images["shape"];
@@ -39,10 +47,10 @@ int main() {
     basic_ops::save_image(img3, "../traffic_sign_templates/vf_signs/arrows/arrow_70x88.jpg");
     basic_ops::save_image(img4, "../traffic_sign_templates/vf_signs/arrows/arrow_90x113.jpg");*/
 
-
-    std::vector<BoundingBox> color_bounding_boxes = color_pipeline::start_pipeline_colors(color_images);
-    std::vector<BoundingBox> shape_bounding_boxes = shape_pipeline::start_pipeline_shapes(shape_images);
-    std::vector<BoundingBox> template_matching_bounding_boxes =  template_pipeline::start_pipeline_template_matching(resized_images, templates);
+    bool debug_mode = true;
+    std::vector<BoundingBox> color_bounding_boxes = color_pipeline::start_pipeline_colors(color_images, debug_mode);
+    std::vector<BoundingBox> shape_bounding_boxes = shape_pipeline::start_pipeline_shapes(shape_images, debug_mode);
+    std::vector<BoundingBox> template_matching_bounding_boxes =  template_pipeline::start_pipeline_template_matching(resized_images, templates, debug_mode);
     std::unordered_map<std::string, std::vector<BoundingBox>> bounding_boxes ={
         {"color", color_bounding_boxes},
         {"shape", shape_bounding_boxes},

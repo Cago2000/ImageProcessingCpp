@@ -7,14 +7,13 @@
 #include "../header/bounding_box.hpp"
 
 namespace color_pipeline {
-    std::vector<BoundingBox> start_pipeline_colors(std::vector<cv::Mat> color_images) {
+    std::vector<BoundingBox> start_pipeline_colors(std::vector<cv::Mat> color_images, bool debug_mode) {
         std::vector<bool(*)(float, float, float)> color_functions = {
             colors::is_strong_red,
             colors::is_strong_yellow,
             colors::is_strong_blue
         };
         std::vector<BoundingBox> color_bounding_boxes;
-
         for (size_t i = 0; i < color_images.size(); i++) {
             const cv::Mat& image = color_images[i];
             int height = image.size().height;
@@ -45,9 +44,11 @@ namespace color_pipeline {
                         color_bounding_boxes.push_back(*bounding_box);
                     }
                 }
-                /*cv::imshow("Mask #" + std::to_string(i), mask);
-                cv::waitKey(0);
-                cv::destroyAllWindows();*/
+                if (debug_mode) {
+                    cv::imshow("Mask #" + std::to_string(i), mask);
+                    cv::waitKey(0);
+                    cv::destroyAllWindows();
+                }
             }
         }
         color_bounding_boxes = bounding_box::merge_duplicate_boxes(color_bounding_boxes, 10);

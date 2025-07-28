@@ -12,8 +12,7 @@ namespace pipeline_preprocessing {
         for (const auto& image : images) {
             int height = image.size().height;
             int width = image.size().width;
-            cv::Mat resized_image = geo_ops::resize_image(image, static_cast<int>(width/8), static_cast<int>(height/8));
-
+            cv::Mat resized_image = geo_ops::resize_image(image, width/8, height/8);
             resized_images.push_back(resized_image);
         }
         return resized_images;
@@ -34,7 +33,8 @@ namespace pipeline_preprocessing {
         for (auto& image : images) {
             cv::Mat shape_image;
             cv::cvtColor(image, shape_image, cv::COLOR_BGR2GRAY);
-            cv::GaussianBlur(shape_image, shape_image, cv::Size(5, 5), 0);
+            cv::medianBlur(shape_image, shape_image, 5);
+            cv::GaussianBlur(shape_image, shape_image, cv::Size(3, 3), 0);
             cv::Canny(shape_image, shape_image, 100, 240);
             cv::threshold(shape_image, shape_image, 30, 255, cv::THRESH_BINARY);
             shape_images.push_back(shape_image);
@@ -58,14 +58,7 @@ namespace pipeline_preprocessing {
     }
 
 
-    std::unordered_map<std::string, std::vector<cv::Mat>> start_preprocessing_pipeline() {
-        std::vector<std::string> folders = {
-            "../traffic_sign_images/vf",
-            "../traffic_sign_images/vfa",
-            "../traffic_sign_images/vfs",
-            "../traffic_sign_images/stop"
-            //"../traffic_sign_images/debug"
-        };
+    std::unordered_map<std::string, std::vector<cv::Mat>> start_preprocessing_pipeline(std::vector<std::string> folders) {
 
         std::vector<cv::Mat> stop_templates = basic_ops::load_images("../traffic_sign_templates/stop_signs/resized", 4, true);
         std::vector<cv::Mat> vf_templates = basic_ops::load_images("../traffic_sign_templates/vf_signs/arrows", 4, true);
