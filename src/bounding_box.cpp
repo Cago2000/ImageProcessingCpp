@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <numeric>
 #include "header/bounding_box.hpp"
-#include "header/basic_image_operations.hpp""
+#include "header/basic_image_operations.hpp"
 #include <memory_resource>
 
 namespace bounding_box {
@@ -94,13 +94,11 @@ std::vector<BoundingBox> fuse_bounding_box_matches(
                 continue;
             }
 
-            // Define bounding rects
             cv::Rect rect1(box1.center_x - box1.box_width / 2, box1.center_y - box1.box_height / 2,
                            box1.box_width, box1.box_height);
             cv::Rect rect2(box2.center_x - box2.box_width / 2, box2.center_y - box2.box_height / 2,
                            box2.box_width, box2.box_height);
 
-            // Determine if one box is completely inside the other
             bool box1_inside_box2 = (rect2.contains(rect1.tl()) && rect2.contains(rect1.br()));
             bool box2_inside_box1 = (rect1.contains(rect2.tl()) && rect1.contains(rect2.br()));
 
@@ -277,8 +275,7 @@ std::vector<BoundingBox> tag_bounding_boxes(std::vector<BoundingBox>& fused_boun
                 }
             }
         }
-        if (bounding_box.box_color == cv::Vec3b(0, 255, 255) &&
-            bounding_box.box_shape == "Square or Diamond"){
+        if (bounding_box.box_color == cv::Vec3b(0, 255, 255)){
             bounding_box.box_sign = "vfs";
         }
         if (bounding_box.box_color == cv::Vec3b(0, 0, 255) && bounding_box.box_shape == "Octagon") {
@@ -307,4 +304,13 @@ std::vector<BoundingBox> tag_bounding_boxes(std::vector<BoundingBox>& fused_boun
         }
         return cropped_images;
     }
+
+    std::vector<BoundingBox> sort_bbox_list(std::vector<BoundingBox> bounding_boxes) {
+        std::sort(bounding_boxes.begin(), bounding_boxes.end(),
+        [](const BoundingBox& a, const BoundingBox& b) {
+         return a.image_index < b.image_index;
+        });
+        return bounding_boxes;
+    }
+
 }

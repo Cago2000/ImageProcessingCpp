@@ -22,6 +22,15 @@ namespace box_fusion_pipeline {
         filtered_bounding_boxes = bounding_box::tag_bounding_boxes(fused_bounding_boxes, template_bounding_boxes, 5);
         filtered_bounding_boxes = bounding_box::merge_duplicate_boxes(filtered_bounding_boxes, 30);
 
+        for (auto& color_bbox: color_bounding_boxes) {
+            if (color_bbox.box_color == cv::Vec3b(0, 255, 255)) {
+                color_bbox.box_sign = "vfs";
+                filtered_bounding_boxes.push_back(color_bbox);
+            }
+        }
+        filtered_bounding_boxes = bounding_box::merge_duplicate_boxes(filtered_bounding_boxes, 30);
+        filtered_bounding_boxes = bounding_box::sort_bbox_list(filtered_bounding_boxes);
+
         std::vector<cv::Mat> bbox_images = std::move(resized_images);
         for (auto& bounding_box : filtered_bounding_boxes) {
             cv::Mat bbox_image = bounding_box::draw_bounding_box(bounding_box, bbox_images[bounding_box.image_index], bounding_box.box_color);

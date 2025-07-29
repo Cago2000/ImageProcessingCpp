@@ -60,6 +60,8 @@ namespace bounding_box {
     std::vector<BoundingBox> tag_bounding_boxes(std::vector<BoundingBox>& fused_bounding_boxes, const std::vector<BoundingBox>& template_bounding_boxes, int clipping_tolerance);
 
     std::vector<cv::Mat> get_roi(const std::vector<cv::Mat>& images, const std::vector<BoundingBox>& bounding_boxes, int min_area, int margin);
+
+    std::vector<BoundingBox> sort_bbox_list(std::vector<BoundingBox> bounding_boxes);
 }
 
 #endif // BOUNDING_BOX_HPP
