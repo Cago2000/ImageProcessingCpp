@@ -1,15 +1,12 @@
-//
-// Created by cago on 29.07.25.
-//
-
 #ifndef SHAPES_HPP
 #define SHAPES_HPP
 
+#include <opencv2/opencv.hpp>
+#include <vector>
 
-
-class shapes {
-
-};
+namespace shapes {
+    bool is_valid_octagon(const std::vector<cv::Point>& approx);
+}
 
 
 

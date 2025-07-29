@@ -278,7 +278,7 @@ std::vector<BoundingBox> tag_bounding_boxes(std::vector<BoundingBox>& fused_boun
             }
         }
         if (bounding_box.box_color == cv::Vec3b(0, 255, 255) &&
-            (bounding_box.box_shape == "Square or Diamond" || bounding_box.box_shape == "Rectangle")) {
+            bounding_box.box_shape == "Square or Diamond"){
             bounding_box.box_sign = "vfs";
         }
         if (bounding_box.box_color == cv::Vec3b(0, 0, 255) && bounding_box.box_shape == "Octagon") {
