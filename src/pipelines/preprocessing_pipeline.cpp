@@ -7,12 +7,12 @@
 #include "../header/geometrical_image_operations.hpp"
 
 namespace pipeline_preprocessing {
-    std::vector<cv::Mat> preprocess_resizing(const std::vector<cv::Mat>& images) {
+    std::vector<cv::Mat> preprocess_resizing(const std::vector<cv::Mat>& images, const int resize_factor=8) {
         std::vector<cv::Mat> resized_images;
         for (const auto& image : images) {
             int height = image.size().height;
             int width = image.size().width;
-            cv::Mat resized_image = geo_ops::resize_image(image, width/8, height/8);
+            cv::Mat resized_image = geo_ops::resize_image(image, width/resize_factor, height/resize_factor);
             resized_images.push_back(resized_image);
         }
         return resized_images;
@@ -74,7 +74,7 @@ namespace pipeline_preprocessing {
             }
         }
 
-        std::vector<cv::Mat> resized_images = preprocess_resizing(original_images);
+        std::vector<cv::Mat> resized_images = preprocess_resizing(original_images, 8);
         std::vector<cv::Mat> color_images = preprocess_colors(resized_images);
         std::vector<cv::Mat> shape_images = preprocess_shapes(resized_images);
         std::vector<std::vector<cv::Mat>> templates = preprocess_templates(base_templates);

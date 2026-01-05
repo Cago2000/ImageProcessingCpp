@@ -89,6 +89,9 @@ std::vector<BoundingBox> fuse_bounding_box_matches(
 
     for (const auto& box1 : boxes1) {
         for (const auto& box2 : boxes2) {
+            if (box1.image_index != box2.image_index){
+                continue;
+            }
             if (std::abs(box1.center_y - box2.center_y) >= max_deviation ||
                 std::abs(box1.center_x - box2.center_x) >= max_deviation) {
                 continue;

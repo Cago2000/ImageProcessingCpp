@@ -10,6 +10,7 @@
 
 int main() {
     std::vector<std::string> folders = {
+       // "../traffic_sign_templates/clean_traffic_signs",
         "../traffic_sign_images/vf",
         "../traffic_sign_images/vfa",
         "../traffic_sign_images/vfs",
