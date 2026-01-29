@@ -20,6 +20,7 @@ namespace color_pipeline {
             int width = image.size().width;
             int min_box_area = 1000;
             int max_box_area = height * width;
+            int c = 0;
             for (auto color_function : color_functions) {
                 cv::Mat mask = colors::get_mask(image, color_function);
                 const std::vector<std::vector<cv::Point>>& blobs = cd::get_blobs(mask);
@@ -45,10 +46,23 @@ namespace color_pipeline {
                     }
                 }
                 if (debug_mode) {
-                    cv::imshow("Mask #" + std::to_string(i), mask);
+                    std::unordered_map<int, std::string> color_str = {
+                        {0, "red"},
+                        {1, "yellow"},
+                        {2, "blue"}
+                    };
+                    cv::namedWindow("Mask #" + std::to_string(i) +  " " + color_str[c], cv::WINDOW_NORMAL);
+                    cv::moveWindow("Mask #" + std::to_string(i) +  " " + color_str[c], 0, 100);
+                    cv::imshow("Mask #" + std::to_string(i) +  " " + color_str[c], mask);
+
+                    cv::namedWindow("Original #" + std::to_string(i), cv::WINDOW_NORMAL);
+                    cv::moveWindow("Original #" + std::to_string(i), 800, 100);
+                    cv::imshow("Original #" + std::to_string(i), image);
+
                     cv::waitKey(0);
                     cv::destroyAllWindows();
                 }
+                c++;
             }
         }
         color_bounding_boxes = bounding_box::merge_duplicate_boxes(color_bounding_boxes, 10);

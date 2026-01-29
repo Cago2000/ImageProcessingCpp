@@ -58,20 +58,28 @@ namespace shape_pipeline {
             for (const BoundingBox& bounding_box : shape_bounding_boxes) {
                 if (bounding_box.image_index == i) {
                     std::cout << bounding_box.to_string() << std::endl;
-                    if (bounding_box.box_shape == "Octagon") {
+                    if (bounding_box.box_shape == "Octagon") { // OCTAGON = RED
                         bounding_box::draw_bounding_box(bounding_box, image_copy_with_boxes, {255, 0, 0});
                     }
-                    else if (bounding_box.box_shape == "Triangle") {
+                    else if (bounding_box.box_shape == "Triangle") { // TRIANGLE = BLUE
                         bounding_box::draw_bounding_box(bounding_box, image_copy_with_boxes, {0, 0, 255});
                     }
-                    else if (bounding_box.box_shape == "Rectangle" || bounding_box.box_shape == "Square or Diamond") {
+                    else if (bounding_box.box_shape == "Rectangle" || bounding_box.box_shape == "Square or Diamond") { // RECTANGLE/SQUARE/DIAMOND = YELLOW
                         bounding_box::draw_bounding_box(bounding_box, image_copy_with_boxes, {0, 255, 255});
                     }
                 }
             }
             std::cout << std::endl;
-            cv::imshow("Image " + std::to_string(i), image_copy);
-            basic_ops::show_image(image_copy_with_boxes, "Image " + std::to_string(i)+ " with Boxes");
+            cv::namedWindow("Image #" + std::to_string(i), cv::WINDOW_NORMAL);
+            cv::moveWindow("Image #" + std::to_string(i), 0, 100);
+            cv::imshow("Image #" + std::to_string(i), image_copy);
+
+            cv::namedWindow("Image #" + std::to_string(i)+ " with Boxes", cv::WINDOW_NORMAL);
+            cv::moveWindow("Image #" + std::to_string(i)+ " with Boxes", 800, 100);
+            cv::imshow("Image #" + std::to_string(i)+ " with Boxes", image_copy_with_boxes);
+
+            cv::waitKey(0);
+            cv::destroyAllWindows();
         }
 
         shape_bounding_boxes = bounding_box::merge_duplicate_boxes(shape_bounding_boxes, 20);

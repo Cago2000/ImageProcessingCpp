@@ -68,16 +68,53 @@ namespace template_pipeline {
 
                             if (debug_mode) {
                                 std::cout << "Confidence (maxVal): " << maxVal
-                                      << " | Angle: " << angle
-                                      << " | MatchLoc: " << matchLoc
-                                      << " | Template Size: " << rotated_template.cols << "x" << rotated_template.rows
-                                      << std::endl;
-                                cv::imshow("Match Result", result);
-                                cv::imshow("Detected Match", display);
-                                cv::imshow("Template", rotated_template);
-                                cv::imshow("Mask", mask_copy);
-                                cv::waitKey(0);
+                                          << " | Angle: " << angle
+                                          << " | MatchLoc: " << matchLoc
+                                          << " | Template Size: "
+                                          << rotated_template.cols << "x" << rotated_template.rows
+                                          << std::endl;
+
+                                int start_x = 50;
+                                int start_y = 50;
+                                int padding = 50;
+
+                                // Top-left
+                                cv::namedWindow("Match Result #" + std::to_string(i), cv::WINDOW_NORMAL);
+                                cv::imshow("Match Result #" + std::to_string(i), result);
+                                cv::moveWindow("Match Result #" + std::to_string(i), start_x, start_y);
+
+                                // Top-right
+                                cv::namedWindow("Detected Match #" + std::to_string(i), cv::WINDOW_NORMAL);
+                                cv::imshow("Detected Match #" + std::to_string(i), display);
+                                cv::moveWindow(
+                                    "Detected Match #" + std::to_string(i),
+                                    start_x + result.cols + padding,
+                                    start_y
+                                );
+
+                                // Bottom-left
+                                cv::namedWindow("Template #" + std::to_string(i), cv::WINDOW_NORMAL);
+                                cv::imshow("Template #" + std::to_string(i), rotated_template);
+                                cv::moveWindow(
+                                    "Template #" + std::to_string(i),
+                                    start_x,
+                                    start_y + result.rows + 2*padding
+                                );
+
+                                // Bottom-right
+                                cv::namedWindow("Mask #" + std::to_string(i), cv::WINDOW_NORMAL);
+                                cv::imshow("Mask #" + std::to_string(i), mask_copy);
+                                cv::moveWindow(
+                                    "Mask #" + std::to_string(i),
+                                    start_x + result.cols + 2*padding,
+                                    start_y + result.rows + 2*padding
+                                );
+
+                                cv::waitKey(1);  // force repaint
+                                cv::waitKey(0);  // block
+                                cv::destroyAllWindows();
                             }
+
 
                             int half_width = static_cast<int>(rotated_template.cols / 2);
                             int half_height = static_cast<int>( rotated_template.rows / 2);

@@ -48,7 +48,7 @@ int main() {
     basic_ops::save_image(img3, "../traffic_sign_templates/vf_signs/arrows/arrow_70x88.jpg");
     basic_ops::save_image(img4, "../traffic_sign_templates/vf_signs/arrows/arrow_90x113.jpg");*/
 
-    bool debug_mode = false;
+    bool debug_mode = true;
     std::vector<BoundingBox> color_bounding_boxes = color_pipeline::start_pipeline_colors(color_images, debug_mode);
     std::vector<BoundingBox> shape_bounding_boxes = shape_pipeline::start_pipeline_shapes(shape_images, debug_mode);
     std::vector<BoundingBox> template_matching_bounding_boxes =  template_pipeline::start_pipeline_template_matching(resized_images, templates, debug_mode);
