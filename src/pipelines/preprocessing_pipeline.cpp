@@ -74,7 +74,7 @@ namespace pipeline_preprocessing {
             }
         }
 
-        std::vector<cv::Mat> resized_images = preprocess_resizing(original_images, 8);
+        std::vector<cv::Mat> resized_images = preprocess_resizing(original_images, 1);
         std::vector<cv::Mat> color_images = preprocess_colors(resized_images);
         std::vector<cv::Mat> shape_images = preprocess_shapes(resized_images);
         std::vector<std::vector<cv::Mat>> templates = preprocess_templates(base_templates);

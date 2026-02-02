@@ -9,15 +9,18 @@
 #include "../header/preprocessing_pipeline.hpp"
 
 int main() {
+    // CLEAN IMAGES, resize_factor is 1!
     std::vector<std::string> folders = {
-       // "../traffic_sign_templates/clean_traffic_signs",
-        "../traffic_sign_images/vf",
-        "../traffic_sign_images/vfa",
-        "../traffic_sign_images/vfs",
-         "../traffic_sign_images/stop",
-        //"../traffic_sign_images/debug",
-         //"../traffic_sign_images/problemkinder"
+      "../traffic_sign_templates/clean_traffic_signs",
     };
+
+    // UNCLEAN IMAGES, change resize_factor to 8!
+    /*std::vector<std::string> folders = {
+          "../traffic_sign_images/vf",
+          "../traffic_sign_images/vfa",
+          "../traffic_sign_images/vfs",
+           "../traffic_sign_images/stop",
+      };*/
 
     std::unordered_map<std::string, std::vector<cv::Mat>> images = pipeline_preprocessing::start_preprocessing_pipeline(folders);
     std::vector<cv::Mat> resized_images = images["resized"];
@@ -28,25 +31,8 @@ int main() {
     std::vector<cv::Mat> vfa_templates = images["vfa_templates"];
     std::vector<cv::Mat> vfs_templates = images["vfs_templates"];
     std::unordered_map<std::string, std::vector<cv::Mat>> templates = {
-      //  {"stop", stop_templates},
           {"vf", vf_templates},
-      //  {"vfa", vfa_templates},
-      //  {"vfs", vfs_templates}
     };
-
-
-    /*cv::Mat img1, img2, img3, img4;
-    cv::Mat arrow = basic_ops::load_image("../traffic_sign_templates/vf_signs/arrow.jpg");
-    double height = arrow.rows;
-    double width = arrow.cols;
-    cv::resize(arrow, img1, cv::Size(width * 0.3, height * 0.3), cv::INTER_AREA);
-    cv::resize(arrow, img2, cv::Size(width * 0.5, height * 0.5), cv::INTER_AREA);
-    cv::resize(arrow, img3, cv::Size(width * 0.7, height * 0.7), cv::INTER_AREA);
-    cv::resize(arrow, img4, cv::Size(width * 0.9, height * 0.9), cv::INTER_AREA);
-    basic_ops::save_image(img1, "../traffic_sign_templates/vf_signs/arrows/arrow_30x37.jpg");
-    basic_ops::save_image(img2, "../traffic_sign_templates/vf_signs/arrows/arrow_50x63.jpg");
-    basic_ops::save_image(img3, "../traffic_sign_templates/vf_signs/arrows/arrow_70x88.jpg");
-    basic_ops::save_image(img4, "../traffic_sign_templates/vf_signs/arrows/arrow_90x113.jpg");*/
 
     bool debug_mode = true;
     std::vector<BoundingBox> color_bounding_boxes = color_pipeline::start_pipeline_colors(color_images, debug_mode);
