@@ -59,14 +59,14 @@ namespace shape_pipeline {
                 if (bounding_box.image_index == i) {
                     std::cout << bounding_box.to_string() << std::endl;
                     if (bounding_box.box_shape == "Octagon") { // OCTAGON = RED
-                        bounding_box::draw_bounding_box(bounding_box, image_copy_with_boxes, {255, 0, 0});
+                        bounding_box::draw_bounding_box(bounding_box, image_copy_with_boxes, 1, {255, 0, 0});
                     }
                     else if (bounding_box.box_shape == "Triangle") { // TRIANGLE = BLUE
-                        bounding_box::draw_bounding_box(bounding_box, image_copy_with_boxes, {0, 0, 255});
+                        bounding_box::draw_bounding_box(bounding_box, image_copy_with_boxes, 1, {0, 0, 255});
                     }
                     else if (bounding_box.box_shape == "Rectangle" || bounding_box.box_shape == "Square or Diamond") {
                         // RECTANGLE/SQUARE/DIAMOND = YELLOW
-                        bounding_box::draw_bounding_box(bounding_box, image_copy_with_boxes, {0, 255, 255});
+                        bounding_box::draw_bounding_box(bounding_box, image_copy_with_boxes, 1, {0, 255, 255});
                     }
                 }
             }

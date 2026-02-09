@@ -50,24 +50,47 @@ namespace bounding_box {
         return bounding_boxes;
     }
 
-    cv::Mat draw_bounding_box(const BoundingBox& box, cv::Mat& image, const cv::Vec3b& color = {255, 255, 255}) {
-
-        int top = box.box_corners[0];
-        int left = box.box_corners[1];
+    cv::Mat draw_bounding_box(
+        const BoundingBox& box,
+        cv::Mat& image,
+        int width = 1,
+        const cv::Vec3b& color = {255, 255, 255}
+    ) {
+        int top    = box.box_corners[0];
+        int left   = box.box_corners[1];
         int bottom = box.box_corners[2];
-        int right = box.box_corners[3];
+        int right  = box.box_corners[3];
 
+        int rows = image.rows;
+        int cols = image.cols;
 
-        for (int x = left; x <= right; ++x) {
-            image.at<cv::Vec3b>(top, x) = color;
-            image.at<cv::Vec3b>(bottom, x) = color;
+        for (int w = 0; w < width; ++w) {
+            // top & bottom horizontal lines
+            int t = std::max(0, top - w);
+            int b = std::min(rows - 1, bottom + w);
+
+            for (int x = left; x <= right; ++x) {
+                if (x >= 0 && x < cols) {
+                    image.at<cv::Vec3b>(t, x) = color;
+                    image.at<cv::Vec3b>(b, x) = color;
+                }
+            }
+
+            // left & right vertical lines
+            int l = std::max(0, left - w);
+            int r = std::min(cols - 1, right + w);
+
+            for (int y = top; y <= bottom; ++y) {
+                if (y >= 0 && y < rows) {
+                    image.at<cv::Vec3b>(y, l) = color;
+                    image.at<cv::Vec3b>(y, r) = color;
+                }
+            }
         }
-        for (int y = top; y <= bottom; ++y) {
-            image.at<cv::Vec3b>(y, left) = color;
-            image.at<cv::Vec3b>(y, right) = color;
-        }
+
         return image;
     }
+
 
 std::map<std::string, int> shape_complexity = {
     {"Triangle", 3},
@@ -301,7 +324,7 @@ std::vector<BoundingBox> tag_bounding_boxes(std::vector<BoundingBox>& fused_boun
         for (const auto& bounding_box: bounding_boxes) {
             if (bounding_box.box_area < min_area) {continue;}
             cv::Mat color_image_copy = images[bounding_box.image_index].clone();
-            draw_bounding_box(bounding_box, color_image_copy, bounding_box.box_color);
+            draw_bounding_box(bounding_box, color_image_copy, 1, bounding_box.box_color);
             cv::Point topLeft(bounding_box.box_corners[1]-margin, bounding_box.box_corners[0]-margin);
             cv::Point bottomRight(bounding_box.box_corners[3]+margin, bounding_box.box_corners[2]+margin);
             cv::Rect roi(topLeft, bottomRight);

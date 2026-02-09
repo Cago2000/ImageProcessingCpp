@@ -33,7 +33,9 @@ namespace box_fusion_pipeline {
 
         std::vector<cv::Mat> bbox_images = std::move(resized_images);
         for (auto& bounding_box : filtered_bounding_boxes) {
-            cv::Mat bbox_image = bounding_box::draw_bounding_box(bounding_box, bbox_images[bounding_box.image_index], bounding_box.box_color);
+            float aspectRatio = (float) bounding_box.box_width / bounding_box.box_height;
+            if (aspectRatio < 0.6 || aspectRatio > 1.4){continue;}
+            cv::Mat bbox_image = bounding_box::draw_bounding_box(bounding_box, bbox_images[bounding_box.image_index], 3, bounding_box.box_color);
             bbox_images[bounding_box.image_index] = bbox_image;
         }
 

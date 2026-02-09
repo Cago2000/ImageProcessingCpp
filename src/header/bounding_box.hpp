@@ -50,7 +50,7 @@ namespace bounding_box {
     std::vector<BoundingBox> create_bounding_boxes(const std::vector<std::vector<cv::Point>>& contours, int image_index,
                                                     cv::Vec3b& box_color, std::string sign);
 
-    cv::Mat draw_bounding_box(const BoundingBox& bounding_box, cv::Mat& image, const cv::Vec3b& color);
+    cv::Mat draw_bounding_box(const BoundingBox& bounding_box, cv::Mat& image, int width, const cv::Vec3b& color);
 
     std::vector<BoundingBox> fuse_bounding_box_matches(const std::vector<BoundingBox>& boxes1,
                                                        const std::vector<BoundingBox>& boxes2, int max_deviation);

@@ -9,28 +9,31 @@
 #include "../header/preprocessing_pipeline.hpp"
 
 int main() {
-    int resize_factor = 1;
+    int resize_factor;
     bool debug_mode = false;
 
     /* Bounding Box Colors:
      * VFS = YELLOW
      * VF = BLACK
-     * VFA = RED
-     * STOP = BLUE
+     * VFA = BLUE
+     * STOP = RED
     */
 
     // CLEAN IMAGES, resize_factor is 1!
-    std::vector<std::string> folders = {
+    /*std::vector<std::string> folders = {
       "../traffic_sign_templates/clean_traffic_signs",
     };
+    resize_factor = 1
+    */
 
     // UNCLEAN IMAGES, change resize_factor to 8!
-    /*std::vector<std::string> folders = {
+    std::vector<std::string> folders = {
           "../traffic_sign_images/vf",
           "../traffic_sign_images/vfa",
           "../traffic_sign_images/vfs",
            "../traffic_sign_images/stop",
-      };*/
+      };
+    resize_factor = 8;
 
     std::unordered_map<std::string, std::vector<cv::Mat>> images =
         pipeline_preprocessing::start_preprocessing_pipeline(folders, resize_factor);
