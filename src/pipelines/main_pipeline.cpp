@@ -10,7 +10,7 @@
 
 int main() {
     int resize_factor;
-    bool debug_mode = false;
+    bool debug_mode = true;
 
     /* Bounding Box Colors:
      * VFS = YELLOW
@@ -23,8 +23,8 @@ int main() {
     /*std::vector<std::string> folders = {
       "../traffic_sign_templates/clean_traffic_signs",
     };
-    resize_factor = 1
-    */
+    resize_factor = 1;*/
+
 
     // UNCLEAN IMAGES, change resize_factor to 8!
     std::vector<std::string> folders = {
