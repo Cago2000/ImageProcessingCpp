@@ -76,7 +76,7 @@ namespace template_pipeline {
 
                                 int start_x = 50;
                                 int start_y = 50;
-                                int padding = 50;
+                                int padding = 100;
 
                                 // Top-left
                                 cv::namedWindow("Match Result #" + std::to_string(i), cv::WINDOW_NORMAL);
