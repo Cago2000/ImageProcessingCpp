@@ -58,7 +58,8 @@ namespace pipeline_preprocessing {
     }
 
 
-    std::unordered_map<std::string, std::vector<cv::Mat>> start_preprocessing_pipeline(std::vector<std::string> folders) {
+    std::unordered_map<std::string, std::vector<cv::Mat>> start_preprocessing_pipeline(std::vector<std::string> folders,
+                                                                                       const int resize_factor=8) {
 
         std::vector<cv::Mat> stop_templates = basic_ops::load_images("../traffic_sign_templates/stop_signs/resized", 4, true);
         std::vector<cv::Mat> vf_templates = basic_ops::load_images("../traffic_sign_templates/vf_signs/arrows", 4, true);
@@ -74,7 +75,7 @@ namespace pipeline_preprocessing {
             }
         }
 
-        std::vector<cv::Mat> resized_images = preprocess_resizing(original_images, 1);
+        std::vector<cv::Mat> resized_images = preprocess_resizing(original_images, resize_factor);
         std::vector<cv::Mat> color_images = preprocess_colors(resized_images);
         std::vector<cv::Mat> shape_images = preprocess_shapes(resized_images);
         std::vector<std::vector<cv::Mat>> templates = preprocess_templates(base_templates);

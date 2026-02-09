@@ -263,6 +263,7 @@ std::vector<BoundingBox> tag_bounding_boxes(std::vector<BoundingBox>& fused_boun
         }
         if (bounding_box.box_color == cv::Vec3b(0, 0, 255) && bounding_box.box_shape == "Triangle") {
             bounding_box.box_sign = "vfa";
+            bounding_box.box_color = cv::Vec3b(255, 0, 0);
 
             for (const auto& template_box : template_bounding_boxes) {
                 if (template_box.image_index != bounding_box.image_index) {continue;}
@@ -274,12 +275,14 @@ std::vector<BoundingBox> tag_bounding_boxes(std::vector<BoundingBox>& fused_boun
 
                 if (template_inside) {
                     bounding_box.box_sign = "vf";
+                    bounding_box.box_color = cv::Vec3b(0, 0, 0);
                     break;
                 }
             }
         }
         if (bounding_box.box_color == cv::Vec3b(0, 255, 255)){
             bounding_box.box_sign = "vfs";
+
         }
         if (bounding_box.box_color == cv::Vec3b(0, 0, 255) && bounding_box.box_shape == "Octagon") {
             bounding_box.box_sign = "stop";

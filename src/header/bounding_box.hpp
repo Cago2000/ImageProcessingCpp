@@ -33,9 +33,9 @@ public:
             << ", height=" << box_height
             << ", width=" << box_width
             << ", area=" << box_area
-            << ", color=(B:" << static_cast<int>(box_color[0])
+            << ", color=(R:" << static_cast<int>(box_color[0])
             << ", G:" << static_cast<int>(box_color[1])
-            << ", R:" << static_cast<int>(box_color[2]) << ")"
+            << ", B:" << static_cast<int>(box_color[2]) << ")"
             << ", shape=" << box_shape
             << ", sign=" << box_sign
             << ")";

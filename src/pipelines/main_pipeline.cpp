@@ -9,6 +9,15 @@
 #include "../header/preprocessing_pipeline.hpp"
 
 int main() {
+    int resize_factor = 1;
+    bool debug_mode = false;
+
+    /* Bounding Box Colors:
+     * VFS = YELLOW
+     * VF = BLACK
+     * VFA = RED
+     * STOP = BLUE
+
     // CLEAN IMAGES, resize_factor is 1!
     std::vector<std::string> folders = {
       "../traffic_sign_templates/clean_traffic_signs",
@@ -22,7 +31,8 @@ int main() {
            "../traffic_sign_images/stop",
       };*/
 
-    std::unordered_map<std::string, std::vector<cv::Mat>> images = pipeline_preprocessing::start_preprocessing_pipeline(folders);
+    std::unordered_map<std::string, std::vector<cv::Mat>> images =
+        pipeline_preprocessing::start_preprocessing_pipeline(folders, resize_factor);
     std::vector<cv::Mat> resized_images = images["resized"];
     std::vector<cv::Mat> color_images = images["color"];
     std::vector<cv::Mat> shape_images = images["shape"];
@@ -34,7 +44,6 @@ int main() {
           {"vf", vf_templates},
     };
 
-    bool debug_mode = true;
     std::vector<BoundingBox> color_bounding_boxes = color_pipeline::start_pipeline_colors(color_images, debug_mode);
     std::vector<BoundingBox> shape_bounding_boxes = shape_pipeline::start_pipeline_shapes(shape_images, debug_mode);
     std::vector<BoundingBox> template_matching_bounding_boxes =  template_pipeline::start_pipeline_template_matching(resized_images, templates, debug_mode);

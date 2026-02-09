@@ -64,7 +64,8 @@ namespace shape_pipeline {
                     else if (bounding_box.box_shape == "Triangle") { // TRIANGLE = BLUE
                         bounding_box::draw_bounding_box(bounding_box, image_copy_with_boxes, {0, 0, 255});
                     }
-                    else if (bounding_box.box_shape == "Rectangle" || bounding_box.box_shape == "Square or Diamond") { // RECTANGLE/SQUARE/DIAMOND = YELLOW
+                    else if (bounding_box.box_shape == "Rectangle" || bounding_box.box_shape == "Square or Diamond") {
+                        // RECTANGLE/SQUARE/DIAMOND = YELLOW
                         bounding_box::draw_bounding_box(bounding_box, image_copy_with_boxes, {0, 255, 255});
                     }
                 }
