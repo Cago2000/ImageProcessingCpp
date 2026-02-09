@@ -17,6 +17,7 @@ int main() {
      * VF = BLACK
      * VFA = RED
      * STOP = BLUE
+    */
 
     // CLEAN IMAGES, resize_factor is 1!
     std::vector<std::string> folders = {
